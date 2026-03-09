@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=antidote
+Comment=Flutter Application - antidote
+Exec=/usr/bin/antidote
+Icon=/usr/share/icons/hicolor/256x256/apps/antidote.png
+Terminal=false
+Categories=Utility;Development;

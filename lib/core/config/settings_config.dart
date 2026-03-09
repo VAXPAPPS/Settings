@@ -10,6 +10,7 @@ import 'package:antidote/screens/mouse_settings/mouse_settings_page.dart';
 import 'package:antidote/screens/keyboard_settings/keyboard_settings_page.dart';
 import 'package:antidote/screens/system_settings/system_settings_page.dart';
 import 'package:antidote/screens/power_settings/power_settings_page.dart';
+import 'package:antidote/screens/window_manager/window_manager_page.dart';
 
 class SettingsPageItem {
   final String label;
@@ -38,6 +39,11 @@ const List<SettingsPageItem> settingsPages = [
     label: 'Ethernet',
     icon: Icons.cable_rounded,
     page: EthernetSettingsPage(),
+  ),
+  SettingsPageItem(
+    label: 'Window Manager',
+    icon: Icons.window_rounded,
+    page: WindowManagerPage(),
   ),
   SettingsPageItem(
     label: 'Venom Effects',
@@ -79,4 +85,5 @@ const List<SettingsPageItem> settingsPages = [
     icon: Icons.power_settings_new_rounded,
     page: PowerSettingsPage(),
   ),
+
 ];

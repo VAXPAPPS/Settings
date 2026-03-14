@@ -8,16 +8,16 @@ class MouseService {
     _object = DBusRemoteObject(
       DBusService().client,
       name: 'org.venom.Input',
-      path: DBusObjectPath('/org/venom/Input/Mouse'),
+      path: DBusObjectPath('/org/venom/Input'),
     );
   }
 
   Future<bool> setPrimaryButton(String button) async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Mouse',
-        'SetPrimaryButton',
-        [DBusString(button)],
+        'org.venom.Input',
+        'SetMouseLeftHanded',
+        [DBusBoolean(button == 'right')],
         replySignature: DBusSignature('b'),
       );
       return result.values[0].asBoolean();
@@ -29,12 +29,12 @@ class MouseService {
   Future<String> getPrimaryButton() async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Mouse',
-        'GetPrimaryButton',
+        'org.venom.Input',
+        'GetMouseSettings',
         [],
-        replySignature: DBusSignature('s'),
+        replySignature: DBusSignature('ddbb'),
       );
-      return result.values[0].asString();
+      return result.values[3].asBoolean() ? 'right' : 'left';
     } catch (e) {
       return 'left';
     }
@@ -43,8 +43,8 @@ class MouseService {
   Future<bool> setPointerSpeed(double speed) async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Mouse',
-        'SetPointerSpeed',
+        'org.venom.Input',
+        'SetMouseSpeed',
         [DBusDouble(speed)],
         replySignature: DBusSignature('b'),
       );
@@ -57,23 +57,23 @@ class MouseService {
   Future<double> getPointerSpeed() async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Mouse',
-        'GetPointerSpeed',
+        'org.venom.Input',
+        'GetMouseSettings',
         [],
-        replySignature: DBusSignature('d'),
+        replySignature: DBusSignature('ddbb'),
       );
-      return result.values[0].asDouble();
+      return result.values[1].asDouble();
     } catch (e) {
-      return 0.0;
+      return 1.0;
     }
   }
 
   Future<bool> setAccelerationEnabled(bool enabled) async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Mouse',
-        'SetAccelerationEnabled',
-        [DBusBoolean(enabled)],
+        'org.venom.Input',
+        'SetMouseAccel',
+        [DBusDouble(enabled ? 0.0 : -1.0)],
         replySignature: DBusSignature('b'),
       );
       return result.values[0].asBoolean();
@@ -85,12 +85,12 @@ class MouseService {
   Future<bool> getAccelerationEnabled() async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Mouse',
-        'GetAccelerationEnabled',
+        'org.venom.Input',
+        'GetMouseSettings',
         [],
-        replySignature: DBusSignature('b'),
+        replySignature: DBusSignature('ddbb'),
       );
-      return result.values[0].asBoolean();
+      return result.values[0].asDouble() >= 0.0;
     } catch (e) {
       return true;
     }
@@ -99,8 +99,8 @@ class MouseService {
   Future<bool> setNaturalScroll(bool enabled) async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Mouse',
-        'SetNaturalScroll',
+        'org.venom.Input',
+        'SetMouseNaturalScroll',
         [DBusBoolean(enabled)],
         replySignature: DBusSignature('b'),
       );
@@ -113,12 +113,12 @@ class MouseService {
   Future<bool> getNaturalScroll() async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Mouse',
-        'GetNaturalScroll',
+        'org.venom.Input',
+        'GetMouseSettings',
         [],
-        replySignature: DBusSignature('b'),
+        replySignature: DBusSignature('ddbb'),
       );
-      return result.values[0].asBoolean();
+      return result.values[2].asBoolean();
     } catch (e) {
       return false;
     }
@@ -132,15 +132,15 @@ class TouchpadService {
     _object = DBusRemoteObject(
       DBusService().client,
       name: 'org.venom.Input',
-      path: DBusObjectPath('/org/venom/Input/Touchpad'),
+      path: DBusObjectPath('/org/venom/Input'),
     );
   }
 
   Future<bool> setEnabled(bool enabled) async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'SetEnabled',
+        'org.venom.Input',
+        'SetTouchpadEnabled',
         [DBusBoolean(enabled)],
         replySignature: DBusSignature('b'),
       );
@@ -153,10 +153,10 @@ class TouchpadService {
   Future<bool> getEnabled() async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'GetEnabled',
+        'org.venom.Input',
+        'GetTouchpadSettings',
         [],
-        replySignature: DBusSignature('b'),
+        replySignature: DBusSignature('bbbsdb'),
       );
       return result.values[0].asBoolean();
     } catch (e) {
@@ -167,8 +167,8 @@ class TouchpadService {
   Future<bool> setDisableWhileTyping(bool enabled) async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'SetDisableWhileTyping',
+        'org.venom.Input',
+        'SetTouchpadDisableWhileTyping',
         [DBusBoolean(enabled)],
         replySignature: DBusSignature('b'),
       );
@@ -181,12 +181,12 @@ class TouchpadService {
   Future<bool> getDisableWhileTyping() async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'GetDisableWhileTyping',
+        'org.venom.Input',
+        'GetTouchpadSettings',
         [],
-        replySignature: DBusSignature('b'),
+        replySignature: DBusSignature('bbbsdb'),
       );
-      return result.values[0].asBoolean();
+      return result.values[5].asBoolean();
     } catch (e) {
       return true;
     }
@@ -195,8 +195,8 @@ class TouchpadService {
   Future<bool> setPointerSpeed(double speed) async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'SetPointerSpeed',
+        'org.venom.Input',
+        'SetTouchpadSpeed',
         [DBusDouble(speed)],
         replySignature: DBusSignature('b'),
       );
@@ -209,22 +209,22 @@ class TouchpadService {
   Future<double> getPointerSpeed() async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'GetPointerSpeed',
+        'org.venom.Input',
+        'GetTouchpadSettings',
         [],
-        replySignature: DBusSignature('d'),
+        replySignature: DBusSignature('bbbsdb'),
       );
-      return result.values[0].asDouble();
+      return result.values[4].asDouble();
     } catch (e) {
-      return 0.0;
+      return 0.5;
     }
   }
 
   Future<bool> setSecondaryClick(String method) async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'SetSecondaryClick',
+        'org.venom.Input',
+        'SetTouchpadScrollMethod',
         [DBusString(method)],
         replySignature: DBusSignature('b'),
       );
@@ -237,12 +237,12 @@ class TouchpadService {
   Future<String> getSecondaryClick() async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'GetSecondaryClick',
+        'org.venom.Input',
+        'GetTouchpadSettings',
         [],
-        replySignature: DBusSignature('s'),
+        replySignature: DBusSignature('bbbsdb'),
       );
-      return result.values[0].asString();
+      return result.values[3].asString();
     } catch (e) {
       return 'two-finger';
     }
@@ -251,8 +251,8 @@ class TouchpadService {
   Future<bool> setTapToClick(bool enabled) async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'SetTapToClick',
+        'org.venom.Input',
+        'SetTouchpadTapToClick',
         [DBusBoolean(enabled)],
         replySignature: DBusSignature('b'),
       );
@@ -265,12 +265,12 @@ class TouchpadService {
   Future<bool> getTapToClick() async {
     try {
       final result = await _object.callMethod(
-        'org.venom.Input.Touchpad',
-        'GetTapToClick',
+        'org.venom.Input',
+        'GetTouchpadSettings',
         [],
-        replySignature: DBusSignature('b'),
+        replySignature: DBusSignature('bbbsdb'),
       );
-      return result.values[0].asBoolean();
+      return result.values[1].asBoolean();
     } catch (e) {
       return true;
     }
@@ -290,7 +290,7 @@ class KeyboardService {
 
   Future<bool> setLayouts(String layouts) async {
     try {
-      final result = await _object.callMethod('org.venom.Input', 'SetLayouts', [
+      final result = await _object.callMethod('org.venom.Input', 'SetKeyboardLayouts', [
         DBusString(layouts),
       ], replySignature: DBusSignature('b'));
       return result.values[0].asBoolean();
@@ -303,9 +303,9 @@ class KeyboardService {
     try {
       final result = await _object.callMethod(
         'org.venom.Input',
-        'GetLayouts',
+        'GetKeyboardSettings',
         [],
-        replySignature: DBusSignature('s'),
+        replySignature: DBusSignature('sss'),
       );
       return result.values[0].asString();
     } catch (e) {

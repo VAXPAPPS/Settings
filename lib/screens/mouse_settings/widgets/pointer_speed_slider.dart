@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class PointerSpeedSlider extends StatelessWidget {
   final String label;
   final double value;
+  final double max;
   final ValueChanged<double> onChanged;
 
   const PointerSpeedSlider({
     super.key,
     required this.label,
     required this.value,
+    this.max = 1.0,
     required this.onChanged,
   });
 
@@ -45,9 +47,9 @@ class PointerSpeedSlider extends StatelessWidget {
                   ),
                 ),
                 child: Slider(
-                  value: value.clamp(0.0, 1.0),
+                  value: value.clamp(0.0, max),
                   min: 0,
-                  max: 1,
+                  max: max,
                   onChanged: onChanged,
                 ),
               ),

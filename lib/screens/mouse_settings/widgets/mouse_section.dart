@@ -20,6 +20,7 @@ class MouseSection extends StatelessWidget {
             PointerSpeedSlider(
               label: 'Pointer Speed',
               value: state.mousePointerSpeed,
+              max: 2.0,
               onChanged: (value) => context.read<MouseSettingsBloc>().add(
                 SetMousePointerSpeed(value),
               ),

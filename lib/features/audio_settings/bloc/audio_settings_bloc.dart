@@ -227,7 +227,19 @@ class AudioSettingsBloc extends Bloc<AudioSettingsEvent, AudioSettingsState> {
     await _audioService!.setOveramplification(event.enabled);
 
     final maxVolume = await _audioService!.getMaxVolume();
-    emit(state.copyWith(maxVolume: maxVolume));
+    
+    // Clamp the volume to the new max volume if we disabled overamplification
+    // and the volume happens to be higher than the new max.
+    int newVolume = state.outputVolume;
+    if (!event.enabled && state.outputVolume > maxVolume) {
+      newVolume = maxVolume;
+      await _audioService!.setVolume(maxVolume);
+    }
+    
+    emit(state.copyWith(
+      maxVolume: maxVolume,
+      outputVolume: newVolume,
+    ));
   }
 
   Future<void> _onSelectCard(

@@ -29,15 +29,17 @@ class VolumeSlider extends StatelessWidget {
           children: [
             Icon(icon, size: 18, color: muted ? Colors.red : Colors.white70),
             const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Spacer(),
             Text(
               '$value%',
               style: TextStyle(

@@ -6,6 +6,7 @@ import 'package:antidote/screens/venom_effects/widgets/shadows_section.dart';
 import 'package:antidote/screens/venom_effects/widgets/blur_section.dart';
 import 'package:antidote/screens/venom_effects/widgets/animations_section.dart';
 import 'package:antidote/screens/venom_effects/widgets/geometry_section.dart';
+import 'package:antidote/screens/venom_effects/widgets/effects_section.dart';
 
 class CompositorSettingsPage extends StatefulWidget {
   const CompositorSettingsPage({Key? key}) : super(key: key);
@@ -21,7 +22,7 @@ class _CompositorSettingsPageState extends State<CompositorSettingsPage> {
   String? _errorMessage;
   Timer? _debounce;
   final String _configPath =
-      '${Platform.environment['HOME']}/.config/picom/picom.conf';
+      '${Platform.environment['HOME']}/.config/venom-miasma/venom.conf';
 
   
   bool _shadowEnabled = true;
@@ -41,6 +42,17 @@ class _CompositorSettingsPageState extends State<CompositorSettingsPage> {
 
   
   double _cornerRadius = 10.0;
+
+  bool _audioVisualizerEnabled = true;
+  bool _neonAutoColorEnabled = true;
+  double _neonGlowIntensity = 21.8;
+  bool _effectPulse = false;
+  bool _effectFlash = false;
+  bool _effectNeon = true;
+  bool _effectChromatic = true;
+  bool _effectShockwave = false;
+  bool _effectPixelation = false;
+  bool _effectRadialZoom = false;
 
   @override
   void initState() {
@@ -70,6 +82,18 @@ class _CompositorSettingsPageState extends State<CompositorSettingsPage> {
       _fadeSpeed = 70.0; 
 
       _cornerRadius = 10.0;
+      
+      _audioVisualizerEnabled = true;
+      _neonAutoColorEnabled = true;
+      _neonGlowIntensity = 21.8;
+      _effectPulse = false;
+      _effectFlash = false;
+      _effectNeon = true;
+      _effectChromatic = true;
+      _effectShockwave = false;
+      _effectPixelation = false;
+      _effectRadialZoom = false;
+
       _updateConfig();
     });
   }
@@ -162,6 +186,36 @@ class _CompositorSettingsPageState extends State<CompositorSettingsPage> {
         if (cRadiusMatch != null)
           _cornerRadius = double.tryParse(cRadiusMatch.group(1)!) ?? 10.0;
 
+        final avMatch = RegExp(r'^\s*audio-visualizer\s*=\s*(true|false)', multiLine: true).firstMatch(content);
+        if (avMatch != null) _audioVisualizerEnabled = avMatch.group(1) == 'true';
+
+        final nacMatch = RegExp(r'^\s*neon-auto-color\s*=\s*(true|false)', multiLine: true).firstMatch(content);
+        if (nacMatch != null) _neonAutoColorEnabled = nacMatch.group(1) == 'true';
+
+        final ngiMatch = RegExp(r'^\s*neon-glow-intensity\s*=\s*([\d\.]+)', multiLine: true).firstMatch(content);
+        if (ngiMatch != null) _neonGlowIntensity = double.tryParse(ngiMatch.group(1)!) ?? 21.8;
+
+        final epMatch = RegExp(r'^\s*effect-pulse\s*=\s*(true|false)', multiLine: true).firstMatch(content);
+        if (epMatch != null) _effectPulse = epMatch.group(1) == 'true';
+
+        final efMatch = RegExp(r'^\s*effect-flash\s*=\s*(true|false)', multiLine: true).firstMatch(content);
+        if (efMatch != null) _effectFlash = efMatch.group(1) == 'true';
+
+        final enMatch = RegExp(r'^\s*effect-neon\s*=\s*(true|false)', multiLine: true).firstMatch(content);
+        if (enMatch != null) _effectNeon = enMatch.group(1) == 'true';
+
+        final ecMatch = RegExp(r'^\s*effect-chromatic\s*=\s*(true|false)', multiLine: true).firstMatch(content);
+        if (ecMatch != null) _effectChromatic = ecMatch.group(1) == 'true';
+
+        final esMatch = RegExp(r'^\s*effect-shockwave\s*=\s*(true|false)', multiLine: true).firstMatch(content);
+        if (esMatch != null) _effectShockwave = esMatch.group(1) == 'true';
+
+        final epixMatch = RegExp(r'^\s*effect-pixelation\s*=\s*(true|false)', multiLine: true).firstMatch(content);
+        if (epixMatch != null) _effectPixelation = epixMatch.group(1) == 'true';
+
+        final erzMatch = RegExp(r'^\s*effect-radial-zoom\s*=\s*(true|false)', multiLine: true).firstMatch(content);
+        if (erzMatch != null) _effectRadialZoom = erzMatch.group(1) == 'true';
+
         _isLoading = false;
       });
     } catch (e) {
@@ -234,6 +288,17 @@ class _CompositorSettingsPageState extends State<CompositorSettingsPage> {
           'corner-radius',
           _cornerRadius.toInt().toString(),
         );
+
+        content = replaceValue('audio-visualizer', _audioVisualizerEnabled.toString());
+        content = replaceValue('neon-auto-color', _neonAutoColorEnabled.toString());
+        content = replaceValue('neon-glow-intensity', _neonGlowIntensity.toStringAsFixed(1));
+        content = replaceValue('effect-pulse', _effectPulse.toString());
+        content = replaceValue('effect-flash', _effectFlash.toString());
+        content = replaceValue('effect-neon', _effectNeon.toString());
+        content = replaceValue('effect-chromatic', _effectChromatic.toString());
+        content = replaceValue('effect-shockwave', _effectShockwave.toString());
+        content = replaceValue('effect-pixelation', _effectPixelation.toString());
+        content = replaceValue('effect-radial-zoom', _effectRadialZoom.toString());
 
         await file.writeAsString(content);
         debugPrint("Config updated successfully!");
@@ -373,6 +438,30 @@ class _CompositorSettingsPageState extends State<CompositorSettingsPage> {
                           setState(() => _cornerRadius = v);
                           _updateConfig();
                         },
+                      ),
+                      const SizedBox(height: 20),
+
+                      EffectsSection(
+                        audioVisualizerEnabled: _audioVisualizerEnabled,
+                        neonAutoColorEnabled: _neonAutoColorEnabled,
+                        neonGlowIntensity: _neonGlowIntensity,
+                        pulseEnabled: _effectPulse,
+                        flashEnabled: _effectFlash,
+                        neonEnabled: _effectNeon,
+                        chromaticEnabled: _effectChromatic,
+                        shockwaveEnabled: _effectShockwave,
+                        pixelationEnabled: _effectPixelation,
+                        radialZoomEnabled: _effectRadialZoom,
+                        onAudioVisualizerChanged: (v) { setState(() => _audioVisualizerEnabled = v); _updateConfig(); },
+                        onNeonAutoColorChanged: (v) { setState(() => _neonAutoColorEnabled = v); _updateConfig(); },
+                        onNeonGlowIntensityChanged: (v) { setState(() => _neonGlowIntensity = v); _updateConfig(); },
+                        onPulseChanged: (v) { setState(() => _effectPulse = v); _updateConfig(); },
+                        onFlashChanged: (v) { setState(() => _effectFlash = v); _updateConfig(); },
+                        onNeonChanged: (v) { setState(() => _effectNeon = v); _updateConfig(); },
+                        onChromaticChanged: (v) { setState(() => _effectChromatic = v); _updateConfig(); },
+                        onShockwaveChanged: (v) { setState(() => _effectShockwave = v); _updateConfig(); },
+                        onPixelationChanged: (v) { setState(() => _effectPixelation = v); _updateConfig(); },
+                        onRadialZoomChanged: (v) { setState(() => _effectRadialZoom = v); _updateConfig(); },
                       ),
                       const SizedBox(height: 20),
                     ],

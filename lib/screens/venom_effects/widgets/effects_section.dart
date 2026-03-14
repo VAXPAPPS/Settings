@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:antidote/core/glassmorphic_container.dart';
+import 'package:antidote/screens/venom_effects/widgets/switch_setting.dart';
+import 'package:antidote/screens/venom_effects/widgets/slider_setting.dart';
 
 class EffectsSection extends StatelessWidget {
+  final bool audioVisualizerEnabled;
+  final bool neonAutoColorEnabled;
+  final double neonGlowIntensity;
   final bool pulseEnabled;
   final bool flashEnabled;
   final bool neonEnabled;
@@ -9,6 +14,9 @@ class EffectsSection extends StatelessWidget {
   final bool shockwaveEnabled;
   final bool pixelationEnabled;
   final bool radialZoomEnabled;
+  final ValueChanged<bool>? onAudioVisualizerChanged;
+  final ValueChanged<bool>? onNeonAutoColorChanged;
+  final ValueChanged<double>? onNeonGlowIntensityChanged;
   final ValueChanged<bool>? onPulseChanged;
   final ValueChanged<bool>? onFlashChanged;
   final ValueChanged<bool>? onNeonChanged;
@@ -19,6 +27,9 @@ class EffectsSection extends StatelessWidget {
 
   const EffectsSection({
     super.key,
+    this.audioVisualizerEnabled = false,
+    this.neonAutoColorEnabled = false,
+    this.neonGlowIntensity = 21.8,
     this.pulseEnabled = false,
     this.flashEnabled = false,
     this.neonEnabled = false,
@@ -26,6 +37,9 @@ class EffectsSection extends StatelessWidget {
     this.shockwaveEnabled = false,
     this.pixelationEnabled = false,
     this.radialZoomEnabled = false,
+    this.onAudioVisualizerChanged,
+    this.onNeonAutoColorChanged,
+    this.onNeonGlowIntensityChanged,
     this.onPulseChanged,
     this.onFlashChanged,
     this.onNeonChanged,
@@ -48,6 +62,25 @@ class EffectsSection extends StatelessWidget {
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
+          ),
+          const SizedBox(height: 16),
+          SwitchSetting(
+            title: "Enable Audio Visualizer",
+            value: audioVisualizerEnabled,
+            onChanged: onAudioVisualizerChanged ?? (v) {},
+          ),
+          SwitchSetting(
+            title: "Neon Auto Color",
+            value: neonAutoColorEnabled,
+            onChanged: onNeonAutoColorChanged ?? (v) {},
+          ),
+          SliderSetting(
+            title: "Neon Glow Intensity",
+            value: neonGlowIntensity,
+            min: 0.0,
+            max: 50.0,
+            onChanged: onNeonGlowIntensityChanged ?? (v) {},
+            enabled: neonEnabled || audioVisualizerEnabled,
           ),
           const SizedBox(height: 16),
           _EffectTile(

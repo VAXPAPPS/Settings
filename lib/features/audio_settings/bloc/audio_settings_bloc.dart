@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:antidote/core/services/audio_service.dart';
+import 'package:settings/core/services/audio_service.dart';
 import 'audio_settings_event.dart';
 import 'audio_settings_state.dart';
 

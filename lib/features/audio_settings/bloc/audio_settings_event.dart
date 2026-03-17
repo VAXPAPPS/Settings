@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:antidote/core/services/audio_service.dart';
+import 'package:settings/core/services/audio_service.dart';
 
 abstract class AudioSettingsEvent extends Equatable {
   const AudioSettingsEvent();

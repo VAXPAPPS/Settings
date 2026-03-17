@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:antidote/core/services/network_service.dart';
+import 'package:settings/core/services/network_service.dart';
 import 'wifi_settings_event.dart';
 import 'wifi_settings_state.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/window_manager/window_manager.dart';
+import 'package:settings/features/window_manager/window_manager.dart';
 import 'widgets/layout_selector.dart';
 import 'widgets/window_commands.dart';
 import 'widgets/configuration_panel.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/keyboard_settings/keyboard_settings.dart';
+import 'package:settings/features/keyboard_settings/keyboard_settings.dart';
 
 class InputSourceItem extends StatelessWidget {
   final InputSource source;

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:antidote/core/services/network_service.dart';
+import 'package:settings/core/services/network_service.dart';
 
 // Re-export WiFi models from network service
-export 'package:antidote/core/services/network_service.dart'
+export 'package:settings/core/services/network_service.dart'
     show WiFiNetwork, WiFiStatus, ConnectionDetails;
 
 abstract class WiFiSettingsEvent extends Equatable {

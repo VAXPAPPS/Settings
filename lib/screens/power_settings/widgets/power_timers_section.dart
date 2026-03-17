@@ -1,5 +1,5 @@
-import 'package:antidote/core/glassmorphic_container.dart';
-import 'package:antidote/features/power_settings/power_settings.dart';
+import 'package:settings/core/glassmorphic_container.dart';
+import 'package:settings/features/power_settings/power_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

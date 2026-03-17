@@ -1,9 +1,9 @@
-import 'package:antidote/core/appbar.dart';
-import 'package:antidote/core/venom_layout.dart';
+import 'package:settings/core/appbar.dart';
+import 'package:settings/core/venom_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:venom_config/venom_config.dart';
-import 'package:antidote/core/config/settings_config.dart';
+import 'package:settings/core/config/settings_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

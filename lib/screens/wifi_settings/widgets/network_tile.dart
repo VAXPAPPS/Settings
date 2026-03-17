@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/wifi_settings/wifi_settings.dart';
-import 'package:antidote/core/glassmorphic_container.dart';
-import 'package:antidote/core/services/network_service.dart';
+import 'package:settings/features/wifi_settings/wifi_settings.dart';
+import 'package:settings/core/glassmorphic_container.dart';
+import 'package:settings/core/services/network_service.dart';
 
 class NetworkTile extends StatelessWidget {
   final WiFiNetwork network;

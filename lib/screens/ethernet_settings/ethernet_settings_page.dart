@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/ethernet_settings/ethernet_settings.dart';
-import 'package:antidote/core/glassmorphic_container.dart';
+import 'package:settings/features/ethernet_settings/ethernet_settings.dart';
+import 'package:settings/core/glassmorphic_container.dart';
 
 class EthernetSettingsPage extends StatelessWidget {
   const EthernetSettingsPage({super.key});

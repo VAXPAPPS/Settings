@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/system_settings/system_settings.dart';
-import 'package:antidote/screens/system_settings/widgets/system_menu_item.dart';
-import 'package:antidote/screens/system_settings/widgets/region_language_dialog.dart';
-import 'package:antidote/screens/system_settings/widgets/date_time_dialog.dart';
-import 'package:antidote/screens/system_settings/widgets/users_dialog.dart';
-import 'package:antidote/screens/system_settings/widgets/remote_desktop_dialog.dart';
-import 'package:antidote/screens/system_settings/widgets/secure_shell_dialog.dart';
-import 'package:antidote/screens/system_settings/widgets/about_dialog.dart';
+import 'package:settings/features/system_settings/system_settings.dart';
+import 'package:settings/screens/system_settings/widgets/system_menu_item.dart';
+import 'package:settings/screens/system_settings/widgets/region_language_dialog.dart';
+import 'package:settings/screens/system_settings/widgets/date_time_dialog.dart';
+import 'package:settings/screens/system_settings/widgets/users_dialog.dart';
+import 'package:settings/screens/system_settings/widgets/remote_desktop_dialog.dart';
+import 'package:settings/screens/system_settings/widgets/secure_shell_dialog.dart';
+import 'package:settings/screens/system_settings/widgets/about_dialog.dart';
 
 
 class SystemSettingsPage extends StatelessWidget {

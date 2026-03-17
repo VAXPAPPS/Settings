@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:antidote/features/window_manager/services/window_manager_service.dart';
+import 'package:settings/features/window_manager/services/window_manager_service.dart';
 import 'window_manager_event.dart';
 import 'window_manager_state.dart';
 

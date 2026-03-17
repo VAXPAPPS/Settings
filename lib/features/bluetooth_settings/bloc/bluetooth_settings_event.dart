@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 // Re-export Bluetooth models from network service
-export 'package:antidote/core/services/network_service.dart'
+export 'package:settings/core/services/network_service.dart'
     show BluetoothDevice, BluetoothStatus;
 
 abstract class BluetoothSettingsEvent extends Equatable {

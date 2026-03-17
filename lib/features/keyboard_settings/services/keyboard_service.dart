@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../models/input_source.dart';
-import 'package:antidote/core/services/venom_input_service.dart' as venom;
+import 'package:settings/core/services/venom_input_service.dart' as venom;
 import 'layout_repository.dart';
 
 class KeyboardService {

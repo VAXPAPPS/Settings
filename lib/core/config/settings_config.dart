@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/screens/wifi_settings/wifi_settings_page.dart';
-import 'package:antidote/screens/bluetooth_settings/bluetooth_settings_page.dart';
-import 'package:antidote/screens/ethernet_settings/ethernet_settings_page.dart';
-import 'package:antidote/screens/venom_effects/venom_effects.dart';
-import 'package:antidote/screens/apps_settings/apps_settings_page.dart';
-import 'package:antidote/screens/display_settings/display_settings_page.dart';
-import 'package:antidote/screens/audio_settings/audio_settings_page.dart';
-import 'package:antidote/screens/mouse_settings/mouse_settings_page.dart';
-import 'package:antidote/screens/keyboard_settings/keyboard_settings_page.dart';
-import 'package:antidote/screens/system_settings/system_settings_page.dart';
-import 'package:antidote/screens/power_settings/power_settings_page.dart';
-import 'package:antidote/screens/window_manager/window_manager_page.dart';
+import 'package:settings/screens/wifi_settings/wifi_settings_page.dart';
+import 'package:settings/screens/bluetooth_settings/bluetooth_settings_page.dart';
+import 'package:settings/screens/ethernet_settings/ethernet_settings_page.dart';
+import 'package:settings/screens/venom_effects/venom_effects.dart';
+import 'package:settings/screens/apps_settings/apps_settings_page.dart';
+import 'package:settings/screens/display_settings/display_settings_page.dart';
+import 'package:settings/screens/audio_settings/audio_settings_page.dart';
+import 'package:settings/screens/mouse_settings/mouse_settings_page.dart';
+import 'package:settings/screens/keyboard_settings/keyboard_settings_page.dart';
+import 'package:settings/screens/system_settings/system_settings_page.dart';
+import 'package:settings/screens/power_settings/power_settings_page.dart';
+import 'package:settings/screens/window_manager/window_manager_page.dart';
 
 class SettingsPageItem {
   final String label;

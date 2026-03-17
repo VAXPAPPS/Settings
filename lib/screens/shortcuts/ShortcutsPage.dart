@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:antidote/screens/shortcuts/models/shortcut_item.dart';
-import 'package:antidote/screens/shortcuts/services/shortcut_manager.dart';
-import 'package:antidote/screens/shortcuts/widgets/shortcut_list_tile.dart';
-import 'package:antidote/screens/shortcuts/widgets/shortcut_dialog.dart';
+import 'package:settings/screens/shortcuts/models/shortcut_item.dart';
+import 'package:settings/screens/shortcuts/services/shortcut_manager.dart';
+import 'package:settings/screens/shortcuts/widgets/shortcut_list_tile.dart';
+import 'package:settings/screens/shortcuts/widgets/shortcut_dialog.dart';
 
 
 class ShortcutsPage extends StatefulWidget {

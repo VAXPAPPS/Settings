@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:antidote/core/services/venom_display_service.dart';
+import 'package:settings/core/services/venom_display_service.dart';
 import 'display_settings_event.dart';
 import 'display_settings_state.dart';
 import '../../power_settings/services/power_service.dart';

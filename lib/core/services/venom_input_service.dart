@@ -1,5 +1,5 @@
 import 'package:dbus/dbus.dart';
-import 'package:antidote/core/services/dbus_service.dart';
+import 'package:settings/core/services/dbus_service.dart';
 
 class MouseService {
   late DBusRemoteObject _object;

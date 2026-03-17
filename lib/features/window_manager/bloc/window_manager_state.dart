@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:antidote/features/window_manager/models/window_node.dart';
+import 'package:settings/features/window_manager/models/window_node.dart';
 
 enum WindowManagerStatus { initial, loading, loaded, error }
 

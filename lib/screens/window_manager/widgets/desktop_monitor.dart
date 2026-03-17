@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/core/glassmorphic_container.dart';
-import 'package:antidote/features/window_manager/models/window_node.dart';
+import 'package:settings/core/glassmorphic_container.dart';
+import 'package:settings/features/window_manager/models/window_node.dart';
 import 'desktop_creator.dart';
 
 class DesktopManager extends StatelessWidget {

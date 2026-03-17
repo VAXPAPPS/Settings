@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/mouse_settings/mouse_settings.dart';
-import 'package:antidote/screens/mouse_settings/widgets/tabs.dart';
-import 'package:antidote/screens/mouse_settings/widgets/tab_content.dart';
-import 'package:antidote/screens/mouse_settings/widgets/test_button.dart';
+import 'package:settings/features/mouse_settings/mouse_settings.dart';
+import 'package:settings/screens/mouse_settings/widgets/tabs.dart';
+import 'package:settings/screens/mouse_settings/widgets/tab_content.dart';
+import 'package:settings/screens/mouse_settings/widgets/test_button.dart';
 
 
 class MouseSettingsPage extends StatelessWidget {

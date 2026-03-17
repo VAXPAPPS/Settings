@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:venom_config/venom_config.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:antidote/screens/apps_settings/widgets/apps_settings_header.dart';
-import 'package:antidote/screens/apps_settings/widgets/system_theme_color_section.dart';
-import 'package:antidote/screens/apps_settings/widgets/system_text_color_section.dart';
+import 'package:settings/screens/apps_settings/widgets/apps_settings_header.dart';
+import 'package:settings/screens/apps_settings/widgets/system_theme_color_section.dart';
+import 'package:settings/screens/apps_settings/widgets/system_text_color_section.dart';
 
 class AppsSettingsPage extends StatefulWidget {
   const AppsSettingsPage({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/screens/venom_effects/widgets/section_container.dart';
-import 'package:antidote/screens/venom_effects/widgets/slider_setting.dart';
+import 'package:settings/screens/venom_effects/widgets/section_container.dart';
+import 'package:settings/screens/venom_effects/widgets/slider_setting.dart';
 
 class GeometrySection extends StatelessWidget {
   final double cornerRadius;

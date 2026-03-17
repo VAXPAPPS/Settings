@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/core/services/network_service.dart';
+import 'package:settings/core/services/network_service.dart';
 
 class NetworkSettingsSheet extends StatefulWidget {
   final ConnectionDetails details;

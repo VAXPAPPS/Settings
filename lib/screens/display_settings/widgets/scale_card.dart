@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/display_settings/display_settings.dart';
-import 'package:antidote/screens/display_settings/widgets/settings_card.dart';
+import 'package:settings/features/display_settings/display_settings.dart';
+import 'package:settings/screens/display_settings/widgets/settings_card.dart';
 
 class ScaleCard extends StatelessWidget {
   const ScaleCard({super.key});

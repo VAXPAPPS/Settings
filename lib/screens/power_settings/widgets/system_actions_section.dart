@@ -1,4 +1,4 @@
-import 'package:antidote/screens/power_settings/widgets/power_action_button.dart';
+import 'package:settings/screens/power_settings/widgets/power_action_button.dart';
 import 'package:flutter/material.dart';
 
 class SystemActionsSection extends StatelessWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/bluetooth_settings/bluetooth_settings.dart';
-import 'package:antidote/core/glassmorphic_container.dart';
+import 'package:settings/features/bluetooth_settings/bluetooth_settings.dart';
+import 'package:settings/core/glassmorphic_container.dart';
 
 class BluetoothStatusSection extends StatelessWidget {
   const BluetoothStatusSection({super.key});

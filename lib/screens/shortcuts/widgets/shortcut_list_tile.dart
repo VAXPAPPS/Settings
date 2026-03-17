@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/screens/shortcuts/models/shortcut_item.dart';
+import 'package:settings/screens/shortcuts/models/shortcut_item.dart';
 
 class ShortcutListTile extends StatelessWidget {
   final ShortcutItem item;

@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:antidote/features/window_manager/models/window_node.dart';
+import 'package:settings/features/window_manager/models/window_node.dart';
 
 class WindowManagerService {
   Process? _process;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/features/keyboard_settings/keyboard_settings.dart';
+import 'package:settings/features/keyboard_settings/keyboard_settings.dart';
 
 class AddInputSourceDialog extends StatefulWidget {
   final List<InputSource> availableSources;

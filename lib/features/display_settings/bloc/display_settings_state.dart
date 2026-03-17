@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:antidote/core/services/venom_display_service.dart';
+import 'package:settings/core/services/venom_display_service.dart';
 
 enum DisplaySettingsStatus { initial, loading, loaded, error }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/core/glassmorphic_container.dart';
-import 'package:antidote/screens/venom_effects/widgets/switch_setting.dart';
-import 'package:antidote/screens/venom_effects/widgets/slider_setting.dart';
+import 'package:settings/core/glassmorphic_container.dart';
+import 'package:settings/screens/venom_effects/widgets/switch_setting.dart';
+import 'package:settings/screens/venom_effects/widgets/slider_setting.dart';
 
 class EffectsSection extends StatelessWidget {
   final bool audioVisualizerEnabled;

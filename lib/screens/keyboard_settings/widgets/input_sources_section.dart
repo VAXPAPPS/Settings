@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/keyboard_settings/keyboard_settings.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/section_container.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/input_source_item.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/add_input_source_dialog.dart';
+import 'package:settings/features/keyboard_settings/keyboard_settings.dart';
+import 'package:settings/screens/keyboard_settings/widgets/section_container.dart';
+import 'package:settings/screens/keyboard_settings/widgets/input_source_item.dart';
+import 'package:settings/screens/keyboard_settings/widgets/add_input_source_dialog.dart';
 
 class InputSourcesSection extends StatelessWidget {
   const InputSourcesSection({super.key});

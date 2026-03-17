@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/audio_settings/audio_settings.dart';
+import 'package:settings/features/audio_settings/audio_settings.dart';
 import 'widgets/output_section.dart';
 import 'widgets/input_section.dart';
 import 'widgets/sounds_section.dart';

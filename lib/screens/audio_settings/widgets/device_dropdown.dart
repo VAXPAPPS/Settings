@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/core/services/audio_service.dart';
+import 'package:settings/core/services/audio_service.dart';
 
 class DeviceDropdown extends StatelessWidget {
   final String label;

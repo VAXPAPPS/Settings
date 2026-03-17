@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/keyboard_settings/keyboard_settings.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/input_sources_section.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/input_source_switching_section.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/special_character_entry_section.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/section_container.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/clickable_item.dart';
-import 'package:antidote/screens/shortcuts/models/shortcut_item.dart';
-import 'package:antidote/screens/shortcuts/services/shortcut_manager.dart';
-import 'package:antidote/screens/shortcuts/widgets/shortcut_list_tile.dart';
-import 'package:antidote/screens/shortcuts/widgets/shortcut_dialog.dart';
+import 'package:settings/features/keyboard_settings/keyboard_settings.dart';
+import 'package:settings/screens/keyboard_settings/widgets/input_sources_section.dart';
+import 'package:settings/screens/keyboard_settings/widgets/input_source_switching_section.dart';
+import 'package:settings/screens/keyboard_settings/widgets/special_character_entry_section.dart';
+import 'package:settings/screens/keyboard_settings/widgets/section_container.dart';
+import 'package:settings/screens/keyboard_settings/widgets/clickable_item.dart';
+import 'package:settings/screens/shortcuts/models/shortcut_item.dart';
+import 'package:settings/screens/shortcuts/services/shortcut_manager.dart';
+import 'package:settings/screens/shortcuts/widgets/shortcut_list_tile.dart';
+import 'package:settings/screens/shortcuts/widgets/shortcut_dialog.dart';
 
 class KeyboardSettingsPage extends StatelessWidget {
   const KeyboardSettingsPage({super.key});

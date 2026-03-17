@@ -1,4 +1,4 @@
-import 'package:antidote/screens/power_settings/widgets/profile_button.dart';
+import 'package:settings/screens/power_settings/widgets/profile_button.dart';
 import 'package:flutter/material.dart';
 
 class PowerProfilesSection extends StatelessWidget {

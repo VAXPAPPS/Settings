@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/wifi_settings/wifi_settings.dart';
+import 'package:settings/features/wifi_settings/wifi_settings.dart';
 
 class NetworksHeader extends StatelessWidget {
   const NetworksHeader({super.key});

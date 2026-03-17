@@ -1,5 +1,5 @@
 import 'package:dbus/dbus.dart';
-import 'package:antidote/core/services/venom_input_service.dart' as venom;
+import 'package:settings/core/services/venom_input_service.dart' as venom;
 
 class MouseService {
   final DBusClient _bus = DBusClient.session();

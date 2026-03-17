@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:antidote/core/glassmorphic_container.dart';
+import 'package:settings/core/glassmorphic_container.dart';
 
 class ToggleSetting extends StatelessWidget {
   final String label;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/screens/mouse_settings/widgets/touchpad_section.dart';
-import 'package:antidote/screens/mouse_settings/widgets/clicking_section.dart';
-import 'package:antidote/screens/mouse_settings/widgets/tap_to_click_section.dart';
+import 'package:settings/screens/mouse_settings/widgets/touchpad_section.dart';
+import 'package:settings/screens/mouse_settings/widgets/clicking_section.dart';
+import 'package:settings/screens/mouse_settings/widgets/tap_to_click_section.dart';
 
 class TouchpadTab extends StatelessWidget {
   const TouchpadTab({super.key});

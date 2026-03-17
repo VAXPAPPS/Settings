@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:antidote/screens/shortcuts/models/shortcut_item.dart';
+import 'package:settings/screens/shortcuts/models/shortcut_item.dart';
 
 class VenomShortcutManager {
   

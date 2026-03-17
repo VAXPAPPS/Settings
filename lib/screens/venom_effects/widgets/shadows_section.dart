@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/screens/venom_effects/widgets/section_container.dart';
-import 'package:antidote/screens/venom_effects/widgets/switch_setting.dart';
-import 'package:antidote/screens/venom_effects/widgets/slider_setting.dart';
-import 'package:antidote/screens/venom_effects/widgets/color_slider.dart';
+import 'package:settings/screens/venom_effects/widgets/section_container.dart';
+import 'package:settings/screens/venom_effects/widgets/switch_setting.dart';
+import 'package:settings/screens/venom_effects/widgets/slider_setting.dart';
+import 'package:settings/screens/venom_effects/widgets/color_slider.dart';
 
 class ShadowsSection extends StatelessWidget {
   final bool enabled;

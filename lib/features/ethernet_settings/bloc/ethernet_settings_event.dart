@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 // Re-export Ethernet models from network service
-export 'package:antidote/core/services/network_service.dart'
+export 'package:settings/core/services/network_service.dart'
     show EthernetInterface;
 
 abstract class EthernetSettingsEvent extends Equatable {

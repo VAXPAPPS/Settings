@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/keyboard_settings/keyboard_settings.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/section_container.dart';
-import 'package:antidote/screens/keyboard_settings/widgets/clickable_item.dart';
+import 'package:settings/features/keyboard_settings/keyboard_settings.dart';
+import 'package:settings/screens/keyboard_settings/widgets/section_container.dart';
+import 'package:settings/screens/keyboard_settings/widgets/clickable_item.dart';
 
 class SpecialCharacterEntrySection extends StatelessWidget {
   const SpecialCharacterEntrySection({super.key});

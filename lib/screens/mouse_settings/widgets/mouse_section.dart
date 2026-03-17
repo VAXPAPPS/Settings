@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/mouse_settings/mouse_settings.dart';
-import 'package:antidote/screens/mouse_settings/widgets/section.dart';
-import 'package:antidote/screens/mouse_settings/widgets/pointer_speed_slider.dart';
+import 'package:settings/features/mouse_settings/mouse_settings.dart';
+import 'package:settings/screens/mouse_settings/widgets/section.dart';
+import 'package:settings/screens/mouse_settings/widgets/pointer_speed_slider.dart';
 
 class MouseSection extends StatelessWidget {
   const MouseSection({super.key});

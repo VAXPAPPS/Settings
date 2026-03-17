@@ -1,5 +1,5 @@
-import 'package:antidote/core/glassmorphic_container.dart';
-import 'package:antidote/screens/apps_settings/widgets/color_option.dart';
+import 'package:settings/core/glassmorphic_container.dart';
+import 'package:settings/screens/apps_settings/widgets/color_option.dart';
 import 'package:flutter/material.dart';
 
 class SystemTextColorSection extends StatelessWidget {

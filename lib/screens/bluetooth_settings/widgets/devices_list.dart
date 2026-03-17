@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/bluetooth_settings/bluetooth_settings.dart';
-import 'package:antidote/screens/bluetooth_settings/widgets/device_tile.dart';
+import 'package:settings/features/bluetooth_settings/bluetooth_settings.dart';
+import 'package:settings/screens/bluetooth_settings/widgets/device_tile.dart';
 
 class DevicesList extends StatelessWidget {
   const DevicesList({super.key});

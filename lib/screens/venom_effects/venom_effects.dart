@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:antidote/screens/venom_effects/widgets/shadows_section.dart';
-import 'package:antidote/screens/venom_effects/widgets/blur_section.dart';
-import 'package:antidote/screens/venom_effects/widgets/animations_section.dart';
-import 'package:antidote/screens/venom_effects/widgets/geometry_section.dart';
-import 'package:antidote/screens/venom_effects/widgets/effects_section.dart';
+import 'package:settings/screens/venom_effects/widgets/shadows_section.dart';
+import 'package:settings/screens/venom_effects/widgets/blur_section.dart';
+import 'package:settings/screens/venom_effects/widgets/animations_section.dart';
+import 'package:settings/screens/venom_effects/widgets/geometry_section.dart';
+import 'package:settings/screens/venom_effects/widgets/effects_section.dart';
 
 class CompositorSettingsPage extends StatefulWidget {
   const CompositorSettingsPage({Key? key}) : super(key: key);

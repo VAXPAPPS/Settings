@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:antidote/core/glassmorphic_container.dart';
+import 'package:settings/core/glassmorphic_container.dart';
 
 class ColorPickerWidget extends StatefulWidget {
   final String label;

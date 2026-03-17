@@ -1,11 +1,11 @@
-import 'package:antidote/core/glassmorphic_container.dart';
+import 'package:settings/core/glassmorphic_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/wifi_settings/wifi_settings.dart';
-import 'package:antidote/core/services/network_service.dart';
-import 'package:antidote/screens/wifi_settings/widgets/network_tile.dart';
-import 'package:antidote/screens/wifi_settings/widgets/network_settings_sheet.dart';
+import 'package:settings/features/wifi_settings/wifi_settings.dart';
+import 'package:settings/core/services/network_service.dart';
+import 'package:settings/screens/wifi_settings/widgets/network_tile.dart';
+import 'package:settings/screens/wifi_settings/widgets/network_settings_sheet.dart';
 
 class NetworksList extends StatelessWidget {
   const NetworksList({super.key});

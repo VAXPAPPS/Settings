@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:antidote/features/display_settings/display_settings.dart';
+import 'package:settings/features/display_settings/display_settings.dart';
 
 class DisplayProfilesSection extends StatelessWidget {
   const DisplayProfilesSection({super.key});

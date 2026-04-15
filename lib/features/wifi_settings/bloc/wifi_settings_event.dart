@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:settings/core/services/network_service.dart';
+import 'package:settings/core/services/network_manager_service.dart';
 
-// Re-export WiFi models from network service
-export 'package:settings/core/services/network_service.dart'
+// Re-export WiFi models from NetworkManager service
+export 'package:settings/core/services/network_manager_service.dart'
     show WiFiNetwork, WiFiStatus, ConnectionDetails;
 
 abstract class WiFiSettingsEvent extends Equatable {

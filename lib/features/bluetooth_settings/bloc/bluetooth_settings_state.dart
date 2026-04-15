@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:settings/core/services/network_service.dart';
+import 'package:settings/core/services/bluez_service.dart';
 
 enum BluetoothSettingsStatus { initial, loading, ready, scanning, error }
 

@@ -100,7 +100,7 @@ class DeviceTile extends StatelessWidget {
                   tooltip: 'Pair',
                   color: Colors.tealAccent,
                   onPressed: () => context.read<BluetoothSettingsBloc>().add(
-                    PairDevice(device.address),
+                    PairDevice(device.devicePath),
                   ),
                 ),
               // Connect button (for paired but not connected)
@@ -111,7 +111,7 @@ class DeviceTile extends StatelessWidget {
                   tooltip: 'Connect',
                   color: Colors.blueAccent,
                   onPressed: () => context.read<BluetoothSettingsBloc>().add(
-                    ConnectDevice(device.address),
+                    ConnectDevice(device.devicePath),
                   ),
                 ),
               // Disconnect button (for connected devices)
@@ -122,7 +122,7 @@ class DeviceTile extends StatelessWidget {
                   tooltip: 'Disconnect',
                   color: Colors.orangeAccent,
                   onPressed: () => context.read<BluetoothSettingsBloc>().add(
-                    DisconnectDevice(device.address),
+                    DisconnectDevice(device.devicePath),
                   ),
                 ),
               // Remove button
@@ -198,7 +198,7 @@ class DeviceTile extends StatelessWidget {
             onPressed: () {
               Navigator.pop(ctx);
               context.read<BluetoothSettingsBloc>().add(
-                RemoveDevice(device.address),
+                RemoveDevice(device.devicePath),
               );
             },
             child: const Text('Remove', style: TextStyle(color: Colors.red)),

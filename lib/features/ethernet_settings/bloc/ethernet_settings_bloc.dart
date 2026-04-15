@@ -1,12 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settings/core/services/network_service.dart';
+import 'package:settings/core/services/network_manager_service.dart';
 import 'ethernet_settings_event.dart';
 import 'ethernet_settings_state.dart';
 
 class EthernetSettingsBloc
     extends Bloc<EthernetSettingsEvent, EthernetSettingsState> {
-  NetworkService? _networkService;
+  NetworkManagerService? _nm;
 
   EthernetSettingsBloc() : super(const EthernetSettingsState()) {
     on<InitializeEthernet>(_onInitializeEthernet);
@@ -21,9 +21,9 @@ class EthernetSettingsBloc
   ) async {
     emit(state.copyWith(status: EthernetSettingsStatus.loading));
 
-    _networkService = NetworkService();
-    final connected = await _networkService!.connect().timeout(
-      const Duration(seconds: 3),
+    _nm = NetworkManagerService();
+    final connected = await _nm!.connect().timeout(
+      const Duration(seconds: 5),
       onTimeout: () => false,
     );
 
@@ -31,14 +31,14 @@ class EthernetSettingsBloc
       emit(
         state.copyWith(
           status: EthernetSettingsStatus.error,
-          errorMessage: 'Failed to connect to Network Daemon',
+          errorMessage: 'Failed to connect to NetworkManager (System D-Bus)',
         ),
       );
       return;
     }
 
     try {
-      final interfaces = await _networkService!.getEthernetInterfaces();
+      final interfaces = await _nm!.getEthernetInterfaces();
       emit(
         state.copyWith(
           status: EthernetSettingsStatus.loaded,
@@ -60,9 +60,9 @@ class EthernetSettingsBloc
     RefreshInterfaces event,
     Emitter<EthernetSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
+    if (_nm == null) return;
 
-    final interfaces = await _networkService!.getEthernetInterfaces();
+    final interfaces = await _nm!.getEthernetInterfaces();
     emit(state.copyWith(interfaces: interfaces));
   }
 
@@ -70,14 +70,13 @@ class EthernetSettingsBloc
     EnableInterface event,
     Emitter<EthernetSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
+    if (_nm == null) return;
 
-    final success = await _networkService!.enableEthernet(event.name);
+    final success = await _nm!.enableEthernet(event.name);
     if (success) {
-      // Wait for daemon to establish connection
-      await Future.delayed(const Duration(milliseconds: 500));
-      // Refresh to get actual state from daemon
-      final interfaces = await _networkService!.getEthernetInterfaces();
+      // Wait briefly for NM to update connection state
+      await Future.delayed(const Duration(milliseconds: 800));
+      final interfaces = await _nm!.getEthernetInterfaces();
       emit(state.copyWith(interfaces: interfaces));
     } else {
       emit(state.copyWith(errorMessage: 'Failed to enable ${event.name}'));
@@ -88,14 +87,12 @@ class EthernetSettingsBloc
     DisableInterface event,
     Emitter<EthernetSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
+    if (_nm == null) return;
 
-    final success = await _networkService!.disableEthernet(event.name);
+    final success = await _nm!.disableEthernet(event.name);
     if (success) {
-      // Wait for daemon to update state
-      await Future.delayed(const Duration(milliseconds: 100));
-      // Refresh to get actual state from daemon
-      final interfaces = await _networkService!.getEthernetInterfaces();
+      await Future.delayed(const Duration(milliseconds: 200));
+      final interfaces = await _nm!.getEthernetInterfaces();
       emit(state.copyWith(interfaces: interfaces));
     } else {
       emit(state.copyWith(errorMessage: 'Failed to disable ${event.name}'));
@@ -104,7 +101,7 @@ class EthernetSettingsBloc
 
   @override
   Future<void> close() {
-    _networkService?.disconnect();
+    _nm?.disconnect();
     return super.close();
   }
 }

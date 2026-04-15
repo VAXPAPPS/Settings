@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:settings/core/services/network_service.dart';
+import 'package:settings/core/services/network_manager_service.dart';
 
 enum EthernetSettingsStatus { initial, loading, loaded, error }
 

@@ -1,11 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settings/core/services/network_service.dart';
+import 'package:settings/core/services/network_manager_service.dart';
 import 'wifi_settings_event.dart';
 import 'wifi_settings_state.dart';
 
 class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
-  NetworkService? _networkService;
+  NetworkManagerService? _nm;
 
   WiFiSettingsBloc() : super(const WiFiSettingsState()) {
     on<InitializeWiFi>(_onInitializeWiFi);
@@ -27,9 +27,9 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
   ) async {
     emit(state.copyWith(status: WiFiSettingsStatus.loading));
 
-    _networkService = NetworkService();
-    final connected = await _networkService!.connect().timeout(
-      const Duration(seconds: 3),
+    _nm = NetworkManagerService();
+    final connected = await _nm!.connect().timeout(
+      const Duration(seconds: 5),
       onTimeout: () => false,
     );
 
@@ -37,17 +37,20 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
       emit(
         state.copyWith(
           status: WiFiSettingsStatus.error,
-          errorMessage: 'Failed to connect to Network Daemon',
+          errorMessage: 'Failed to connect to NetworkManager (System D-Bus)',
         ),
       );
       return;
     }
 
     try {
-      final wifiEnabled = await _networkService!.isWifiEnabled();
-      final wifiStatus = await _networkService!.getWifiStatus();
-      final networks = await _networkService!.getWifiNetworks();
-      final savedNetworks = await _networkService!.getSavedNetworks();
+      // Request a fresh scan immediately
+      await _nm!.requestScan();
+
+      final wifiEnabled = await _nm!.isWifiEnabled();
+      final wifiStatus = await _nm!.getWifiStatus();
+      final networks = await _nm!.getWifiNetworks();
+      final savedNetworks = await _nm!.getSavedNetworks();
 
       emit(
         state.copyWith(
@@ -73,13 +76,13 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
     ToggleWiFi event,
     Emitter<WiFiSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
+    if (_nm == null) return;
 
     emit(state.copyWith(wifiEnabled: event.enabled));
 
-    final success = await _networkService!.setWifiEnabled(event.enabled);
+    final success = await _nm!.setWifiEnabled(event.enabled);
     if (success) {
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 800));
       add(const RefreshNetworks());
     } else {
       emit(state.copyWith(wifiEnabled: !event.enabled));
@@ -90,14 +93,18 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
     RefreshNetworks event,
     Emitter<WiFiSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
+    if (_nm == null) return;
 
     emit(state.copyWith(isScanning: true));
 
-    final wifiStatus = await _networkService!.getWifiStatus();
-    final networks = await _networkService!.getWifiNetworks();
-    final savedNetworks = await _networkService!.getSavedNetworks();
-    final wifiEnabled = await _networkService!.isWifiEnabled();
+    // Request a new scan then wait briefly for results
+    await _nm!.requestScan();
+    await Future.delayed(const Duration(seconds: 2));
+
+    final wifiStatus = await _nm!.getWifiStatus();
+    final networks = await _nm!.getWifiNetworks();
+    final savedNetworks = await _nm!.getSavedNetworks();
+    final wifiEnabled = await _nm!.isWifiEnabled();
 
     emit(
       state.copyWith(
@@ -114,9 +121,9 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
     ConnectToNetwork event,
     Emitter<WiFiSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
+    if (_nm == null) return;
 
-    // If secured and no password, request password
+    // If secured and no password provided, ask for it
     if (event.network.secured && event.password.isEmpty) {
       emit(state.copyWith(passwordRequiredFor: event.network));
       return;
@@ -129,13 +136,13 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
       ),
     );
 
-    final success = await _networkService!.wifiConnect(
+    final success = await _nm!.wifiConnect(
       event.network.ssid,
       event.password,
     );
 
     if (success) {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 2));
       add(const RefreshNetworks());
       emit(state.copyWith(status: WiFiSettingsStatus.loaded));
     } else {
@@ -152,9 +159,9 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
     DisconnectNetwork event,
     Emitter<WiFiSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
+    if (_nm == null) return;
 
-    final success = await _networkService!.wifiDisconnect();
+    final success = await _nm!.wifiDisconnect();
     if (success) {
       add(const RefreshNetworks());
     }
@@ -164,9 +171,9 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
     ForgetNetwork event,
     Emitter<WiFiSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
+    if (_nm == null) return;
 
-    final success = await _networkService!.forgetNetwork(event.ssid);
+    final success = await _nm!.forgetNetwork(event.ssid);
     if (success) {
       add(const RefreshNetworks());
     } else {
@@ -178,18 +185,16 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
     SetAutoConnect event,
     Emitter<WiFiSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
-
-    await _networkService!.setAutoConnect(event.ssid, event.autoConnect);
+    if (_nm == null) return;
+    await _nm!.setAutoConnect(event.ssid, event.autoConnect);
   }
 
   Future<void> _onSetStaticIP(
     SetStaticIP event,
     Emitter<WiFiSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
-
-    await _networkService!.setStaticIP(
+    if (_nm == null) return;
+    await _nm!.setStaticIP(
       event.ssid,
       event.ip,
       event.gateway,
@@ -202,15 +207,16 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
     SetDHCP event,
     Emitter<WiFiSettingsState> emit,
   ) async {
-    if (_networkService == null) return;
-
-    await _networkService!.setDHCP(event.ssid);
+    if (_nm == null) return;
+    await _nm!.setDHCP(event.ssid);
   }
 
-  Future<void> _onSetDNS(SetDNS event, Emitter<WiFiSettingsState> emit) async {
-    if (_networkService == null) return;
-
-    await _networkService!.setDNS(event.ssid, event.dns1, event.dns2);
+  Future<void> _onSetDNS(
+    SetDNS event,
+    Emitter<WiFiSettingsState> emit,
+  ) async {
+    if (_nm == null) return;
+    await _nm!.setDNS(event.ssid, event.dns1, event.dns2);
   }
 
   void _onPasswordRequired(
@@ -222,7 +228,7 @@ class WiFiSettingsBloc extends Bloc<WiFiSettingsEvent, WiFiSettingsState> {
 
   @override
   Future<void> close() {
-    _networkService?.disconnect();
+    _nm?.disconnect();
     return super.close();
   }
 }

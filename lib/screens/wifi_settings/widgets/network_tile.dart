@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settings/features/wifi_settings/wifi_settings.dart';
 import 'package:settings/core/glassmorphic_container.dart';
-import 'package:settings/core/services/network_service.dart';
 
 class NetworkTile extends StatelessWidget {
   final WiFiNetwork network;

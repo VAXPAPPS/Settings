@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:settings/screens/shortcuts/models/shortcut_item.dart';
+import 'package:uuid/uuid.dart';
 
 class ShortcutDialog extends StatefulWidget {
   final ShortcutItem? existingItem;
@@ -118,13 +119,15 @@ class _ShortcutDialogState extends State<ShortcutDialog> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan[700]),
           onPressed: () {
-            if (_keyController.text.isEmpty || _cmdController.text.isEmpty)
+            if (_keyController.text.isEmpty || _cmdController.text.isEmpty) {
               return;
+            }
 
             final newItem = ShortcutItem(
-              _selectedMod,
-              _keyController.text,
-              _cmdController.text,
+              id: widget.existingItem?.id ?? const Uuid().v4(),
+              modifier: _selectedMod,
+              key: _keyController.text,
+              command: _cmdController.text,
             );
             widget.onSave(newItem);
             Navigator.pop(context);

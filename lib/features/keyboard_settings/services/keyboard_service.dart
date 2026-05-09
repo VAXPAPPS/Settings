@@ -1,19 +1,17 @@
 import 'package:flutter/foundation.dart';
 import '../models/input_source.dart';
-import 'package:settings/core/services/venom_input_service.dart' as venom;
+import 'package:settings/core/services/wayfire_config_service.dart';
 import 'layout_repository.dart';
 
 class KeyboardService {
   final LayoutRepository _layoutRepository = LayoutRepository();
-  late venom.KeyboardService _keyboard;
+  final WayfireConfigService _wayfire = WayfireConfigService();
 
-  KeyboardService() {
-    _keyboard = venom.KeyboardService();
-  }
+  KeyboardService();
 
   Future<List<InputSource>> getCurrentSources() async {
     try {
-      final activeStr = await _keyboard.getLayouts();
+      final activeStr = await _wayfire.getValue('input', 'xkb_layout') ?? 'us';
       if (activeStr.isEmpty) return [];
 
       final layoutIds = activeStr.split(',');
@@ -23,8 +21,10 @@ class KeyboardService {
       final layoutMap = {for (var l in allLayouts) l.id: l.name};
 
       for (final id in layoutIds) {
-        final name = layoutMap[id] ?? id;
-        sources.add(InputSource(id: id, name: name, type: 'xkb'));
+        final cleanId = id.trim();
+        if (cleanId.isEmpty) continue;
+        final name = layoutMap[cleanId] ?? cleanId;
+        sources.add(InputSource(id: cleanId, name: name, type: 'xkb'));
       }
       return sources;
     } catch (e) {
@@ -57,7 +57,8 @@ class KeyboardService {
       final newSources = [...currentSources, source];
       final layoutsString = newSources.map((s) => s.id).join(',');
 
-      return await _keyboard.setLayouts(layoutsString);
+      await _wayfire.setValue('input', 'xkb_layout', layoutsString);
+      return true;
     } catch (e) {
       debugPrint('Add input source error: $e');
       return false;
@@ -74,7 +75,8 @@ class KeyboardService {
           .toList();
       final layoutsString = newSources.map((s) => s.id).join(',');
 
-      return await _keyboard.setLayouts(layoutsString);
+      await _wayfire.setValue('input', 'xkb_layout', layoutsString);
+      return true;
     } catch (e) {
       debugPrint('Remove input source error: $e');
       return false;

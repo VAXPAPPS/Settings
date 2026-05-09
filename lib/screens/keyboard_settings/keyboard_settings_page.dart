@@ -79,7 +79,7 @@ class _KeyboardSettingsViewState extends State<KeyboardSettingsView> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Saved & Daemon Restarted'),
+                content: Text('Saved to wayfire.ini'),
                 backgroundColor: Colors.green,
                 duration: Duration(seconds: 1),
               ),
@@ -208,18 +208,7 @@ class _KeyboardSettingsViewState extends State<KeyboardSettingsView> {
                 ),
               ),
               const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.refresh, color: Colors.cyanAccent),
-                onPressed: () async {
-                  await _shortcutManager.restartDaemon();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Manual Restart Sent!')),
-                    );
-                  }
-                },
-                tooltip: 'Force Restart Daemon',
-              ),
+              // Removed manual restart daemon button since wayfire auto-reloads
             ],
           ),
           const SizedBox(height: 8),

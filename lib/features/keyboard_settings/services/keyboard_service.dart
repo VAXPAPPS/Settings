@@ -1,17 +1,18 @@
 import 'package:flutter/foundation.dart';
 import '../models/input_source.dart';
-import 'package:settings/core/services/wayfire_config_service.dart';
+import 'package:settings/core/services/compositor_config_interface.dart';
+import 'package:settings/core/services/compositor_service_locator.dart';
 import 'layout_repository.dart';
 
 class KeyboardService {
   final LayoutRepository _layoutRepository = LayoutRepository();
-  final WayfireConfigService _wayfire = WayfireConfigService();
+  final CompositorConfigService _config = CompositorServiceLocator.getService();
 
   KeyboardService();
 
   Future<List<InputSource>> getCurrentSources() async {
     try {
-      final activeStr = await _wayfire.getValue('input', 'xkb_layout') ?? 'us';
+      final activeStr = await _config.getKeyboardLayouts();
       if (activeStr.isEmpty) return [];
 
       final layoutIds = activeStr.split(',');
@@ -57,7 +58,7 @@ class KeyboardService {
       final newSources = [...currentSources, source];
       final layoutsString = newSources.map((s) => s.id).join(',');
 
-      await _wayfire.setValue('input', 'xkb_layout', layoutsString);
+      await _config.setKeyboardLayouts(layoutsString);
       return true;
     } catch (e) {
       debugPrint('Add input source error: $e');
@@ -75,7 +76,7 @@ class KeyboardService {
           .toList();
       final layoutsString = newSources.map((s) => s.id).join(',');
 
-      await _wayfire.setValue('input', 'xkb_layout', layoutsString);
+      await _config.setKeyboardLayouts(layoutsString);
       return true;
     } catch (e) {
       debugPrint('Remove input source error: $e');

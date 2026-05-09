@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'package:settings/screens/shortcuts/models/shortcut_item.dart';
+import 'compositor_config_interface.dart';
 
-class WayfireConfigService {
+class WayfireConfigService implements CompositorConfigService {
   final String _configPath;
 
   WayfireConfigService([String? path])
@@ -154,5 +156,104 @@ class WayfireConfigService {
       await file.create(recursive: true);
     }
     await file.writeAsString('${lines.join('\n')}\n', flush: true);
+  }
+
+  // ── CompositorConfigService Implementation ──
+
+  @override
+  Future<String> getKeyboardLayouts() async {
+    return await getValue('input', 'xkb_layout') ?? 'us';
+  }
+
+  @override
+  Future<void> setKeyboardLayouts(String layouts) async {
+    await setValue('input', 'xkb_layout', layouts);
+  }
+
+  @override
+  Future<List<ShortcutItem>> loadShortcuts() async {
+    final values = await getSectionValues('command');
+    final Map<String, ShortcutItem> itemsMap = {};
+
+    for (final entry in values.entries) {
+      final key = entry.key;
+      final val = entry.value;
+
+      String id = '';
+      bool isBinding = false;
+      bool isCommand = false;
+
+      if (key.startsWith('binding_')) {
+        id = key.substring('binding_'.length);
+        isBinding = true;
+      } else if (key.startsWith('repeatable_binding_')) {
+        id = key.substring('repeatable_binding_'.length);
+        isBinding = true;
+      } else if (key.startsWith('command_')) {
+        id = key.substring('command_'.length);
+        isCommand = true;
+      }
+
+      if (id.isEmpty) continue;
+
+      itemsMap.putIfAbsent(id, () => ShortcutItem(id: id, modifier: 'None', key: '', command: ''));
+
+      if (isBinding) {
+        final parsed = ShortcutItem.parseWayfireBinding(val);
+        itemsMap[id]!.modifier = parsed['modifier'] ?? 'None';
+        itemsMap[id]!.key = parsed['key'] ?? '';
+      } else if (isCommand) {
+        itemsMap[id]!.command = val;
+      }
+    }
+
+    final validItems = itemsMap.values.where((i) => i.key.isNotEmpty && i.command.isNotEmpty).toList();
+    validItems.sort((a, b) => a.id.compareTo(b.id));
+
+    return validItems;
+  }
+
+  @override
+  Future<void> saveShortcuts(List<ShortcutItem> items) async {
+    final existingValues = await getSectionValues('command');
+    
+    final Map<String, String> newValues = {};
+    for (final item in items) {
+      final bindString = item.toWayfireBinding();
+      
+      String bindingKey = 'binding_${item.id}';
+      if (existingValues.containsKey('repeatable_binding_${item.id}')) {
+        bindingKey = 'repeatable_binding_${item.id}';
+      }
+      
+      newValues[bindingKey] = bindString;
+      newValues['command_${item.id}'] = item.command;
+    }
+
+    final keysToDelete = <String>[];
+    final activeIds = items.map((i) => i.id).toSet();
+
+    for (final key in existingValues.keys) {
+      String id = '';
+      if (key.startsWith('binding_')) {
+        id = key.substring('binding_'.length);
+      } else if (key.startsWith('repeatable_binding_')) {
+        id = key.substring('repeatable_binding_'.length);
+      } else if (key.startsWith('command_')) {
+        id = key.substring('command_'.length);
+      }
+
+      if (id.isNotEmpty && !activeIds.contains(id)) {
+        keysToDelete.add(key);
+      }
+    }
+
+    if (keysToDelete.isNotEmpty) {
+      await deleteKeys('command', keysToDelete);
+    }
+    
+    if (newValues.isNotEmpty) {
+      await setValues('command', newValues);
+    }
   }
 }

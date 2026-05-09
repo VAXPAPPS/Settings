@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:settings/screens/shortcuts/models/shortcut_item.dart';
+import 'package:settings/core/models/mouse_config.dart';
 import 'package:uuid/uuid.dart';
 import 'compositor_config_interface.dart';
 
@@ -130,6 +131,75 @@ class SwayConfigService implements CompositorConfigService {
       
       newLines.add('bindsym $modStr${item.key} $cmdStr');
     }
+
+    await _writeLines(newLines);
+  }
+
+  @override
+  Future<MouseConfig> getMouseConfig() async {
+    final lines = await _readLines();
+    final config = MouseConfig();
+    
+    bool inInput = false;
+
+    for (final line in lines) {
+      final trimmed = line.trim();
+      if (trimmed.startsWith('input * {') || trimmed.startsWith('input type:pointer {') || trimmed.startsWith('input type:touchpad {')) {
+        inInput = true;
+      } else if (inInput && trimmed.startsWith('}')) {
+        inInput = false;
+      }
+      
+      if (!inInput) continue;
+
+      final parts = trimmed.split(RegExp(r'\s+'));
+      if (parts.length < 2) continue;
+      final key = parts[0].trim();
+      final val = parts[1].trim();
+
+      if (key == 'left_handed') config.primaryButton = val == 'enabled' ? 'right' : 'left';
+      if (key == 'pointer_accel') config.mousePointerSpeed = double.tryParse(val) ?? 0.0;
+      if (key == 'accel_profile') config.mouseAcceleration = val != 'flat';
+      if (key == 'natural_scroll') config.scrollDirection = val == 'enabled' ? 'natural' : 'traditional';
+      if (key == 'dwt') config.disableWhileTyping = val != 'disabled';
+      if (key == 'tap') config.tapToClick = val != 'disabled';
+    }
+    return config;
+  }
+
+  @override
+  Future<void> saveMouseConfig(MouseConfig config) async {
+    final lines = await _readLines();
+    final newLines = <String>[];
+    
+    for (int i = 0; i < lines.length; i++) {
+      final trimmed = lines[i].trim();
+      if (trimmed.startsWith('left_handed ') ||
+          trimmed.startsWith('pointer_accel ') ||
+          trimmed.startsWith('accel_profile ') ||
+          trimmed.startsWith('natural_scroll ') ||
+          trimmed.startsWith('dwt ') ||
+          trimmed.startsWith('tap ')) {
+        continue;
+      }
+      newLines.add(lines[i]);
+    }
+
+    int inputIdx = newLines.indexWhere((l) => l.trim().startsWith('input * {'));
+    if (inputIdx == -1) {
+      newLines.add('input * {');
+      newLines.add('}');
+      inputIdx = newLines.length - 2;
+    }
+
+    newLines.insertAll(inputIdx + 1, [
+      '    left_handed ${config.primaryButton == 'right' ? 'enabled' : 'disabled'}',
+      '    pointer_accel ${config.mousePointerSpeed.toStringAsFixed(2)}',
+      '    accel_profile ${config.mouseAcceleration ? 'adaptive' : 'flat'}',
+      '    natural_scroll ${config.scrollDirection == 'natural' ? 'enabled' : 'disabled'}',
+      '    dwt ${config.disableWhileTyping ? 'enabled' : 'disabled'}',
+      '    tap ${config.tapToClick ? 'enabled' : 'disabled'}',
+    ]);
 
     await _writeLines(newLines);
   }

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:settings/screens/shortcuts/models/shortcut_item.dart';
+import 'package:settings/core/models/mouse_config.dart';
 import 'compositor_config_interface.dart';
 
 class WayfireConfigService implements CompositorConfigService {
@@ -255,5 +256,36 @@ class WayfireConfigService implements CompositorConfigService {
     if (newValues.isNotEmpty) {
       await setValues('command', newValues);
     }
+  }
+
+  @override
+  Future<MouseConfig> getMouseConfig() async {
+    final values = await getSectionValues('input');
+    
+    return MouseConfig(
+      primaryButton: (values['left_handed_mode'] == 'true') ? 'right' : 'left',
+      mousePointerSpeed: double.tryParse(values['mouse_cursor_speed'] ?? '0.0') ?? 0.0,
+      mouseAcceleration: values['mouse_accel_profile'] != 'flat',
+      scrollDirection: (values['mouse_natural_scroll'] == 'true') ? 'natural' : 'traditional',
+      touchpadEnabled: true,
+      disableWhileTyping: values['disable_while_typing'] != 'false',
+      touchpadPointerSpeed: double.tryParse(values['touchpad_cursor_speed'] ?? '0.0') ?? 0.0,
+      secondaryClick: (values['click_method'] == 'button_areas') ? 'bottom-right' : 'two-finger',
+      tapToClick: values['tap_to_click'] != 'false',
+    );
+  }
+
+  @override
+  Future<void> saveMouseConfig(MouseConfig config) async {
+    await setValues('input', {
+      'left_handed_mode': config.primaryButton == 'right' ? 'true' : 'false',
+      'mouse_cursor_speed': config.mousePointerSpeed.toStringAsFixed(6),
+      'mouse_accel_profile': config.mouseAcceleration ? 'default' : 'flat',
+      'mouse_natural_scroll': config.scrollDirection == 'natural' ? 'true' : 'false',
+      'disable_while_typing': config.disableWhileTyping ? 'true' : 'false',
+      'touchpad_cursor_speed': config.touchpadPointerSpeed.toStringAsFixed(6),
+      'click_method': config.secondaryClick == 'bottom-right' ? 'button_areas' : 'two_finger',
+      'tap_to_click': config.tapToClick ? 'true' : 'false',
+    });
   }
 }

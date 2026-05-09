@@ -40,6 +40,7 @@ class WlrOutputService {
 
   // ── Native callback (must stay alive) ────────────────────────────────────
   late final Pointer<NativeFunction<WlrHeadsChangedFnNative>> _headsChangedPtr;
+  final _activeCallables = <NativeCallable>{};
 
   // ─────────────────────────────────────────────────────────────────────────
   // Lifecycle
@@ -177,8 +178,10 @@ class WlrOutputService {
           _configResultController.add(r);
         }
         nc.close();
+        _activeCallables.remove(nc);
       },
     );
+    _activeCallables.add(nc);
 
     final ok = testOnly
         ? _ffi.testConfig(_handle, configs, nc.nativeFunction)
@@ -186,6 +189,7 @@ class WlrOutputService {
 
     if (!ok) {
       nc.close();
+      _activeCallables.remove(nc);
       completer.complete(WlrConfigResult.failed);
     }
   }

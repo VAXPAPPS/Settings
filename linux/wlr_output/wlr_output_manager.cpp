@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <algorithm>
+#include <poll.h>
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Static listener tables
@@ -148,12 +149,33 @@ void WlrOutputManager::disconnect() {
 
 bool WlrOutputManager::dispatch(int timeout_ms) {
     if (!display_) return false;
-    if (wl_display_flush(display_) < 0) return false;
-    if (timeout_ms > 0) {
+
+    while (wl_display_prepare_read(display_) != 0) {
         wl_display_dispatch_pending(display_);
-        // Blocking dispatch with timeout via wl_display_dispatch
-        return wl_display_dispatch(display_) >= 0;
     }
+
+    if (wl_display_flush(display_) < 0) {
+        wl_display_cancel_read(display_);
+        return false;
+    }
+
+    struct pollfd pfd;
+    pfd.fd = wl_display_get_fd(display_);
+    pfd.events = POLLIN;
+    pfd.revents = 0;
+
+    int ret = poll(&pfd, 1, timeout_ms);
+    if (ret < 0) {
+        wl_display_cancel_read(display_);
+        return false;
+    }
+
+    if (ret > 0 && (pfd.revents & POLLIN)) {
+        wl_display_read_events(display_);
+    } else {
+        wl_display_cancel_read(display_);
+    }
+
     return wl_display_dispatch_pending(display_) >= 0;
 }
 

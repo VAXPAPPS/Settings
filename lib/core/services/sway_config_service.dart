@@ -8,7 +8,8 @@ class SwayConfigService implements CompositorConfigService {
   final String _configPath;
 
   SwayConfigService([String? path])
-      : _configPath = path ?? '${Platform.environment['HOME']}/.config/sway/config';
+    : _configPath =
+          path ?? '${Platform.environment['HOME']}/.config/sway/config';
 
   Future<List<String>> _readLines() async {
     final file = File(_configPath);
@@ -41,7 +42,7 @@ class SwayConfigService implements CompositorConfigService {
   Future<void> setKeyboardLayouts(String layouts) async {
     final lines = await _readLines();
     final newLines = <String>[];
-    
+
     for (final line in lines) {
       if (line.trim().startsWith('xkb_layout')) {
         newLines.add('    xkb_layout $layouts');
@@ -56,7 +57,7 @@ class SwayConfigService implements CompositorConfigService {
   Future<List<ShortcutItem>> loadShortcuts() async {
     final lines = await _readLines();
     final items = <ShortcutItem>[];
-    
+
     for (final line in lines) {
       final trimmed = line.trim();
       if (trimmed.startsWith('bindsym')) {
@@ -64,10 +65,12 @@ class SwayConfigService implements CompositorConfigService {
         if (parts.length >= 3) {
           final bindArgs = parts[1];
           final cmd = parts.sublist(2).join(' ').trim();
-          
+
           final keyParts = bindArgs.split('+');
           final keyStr = keyParts.last;
-          final modStr = keyParts.length > 1 ? keyParts.sublist(0, keyParts.length - 1).join('+').toUpperCase() : '';
+          final modStr = keyParts.length > 1
+              ? keyParts.sublist(0, keyParts.length - 1).join('+').toUpperCase()
+              : '';
 
           String uiMod = 'None';
           if (modStr.contains('CTRL') && modStr.contains('MOD1')) {
@@ -86,12 +89,14 @@ class SwayConfigService implements CompositorConfigService {
             uiMod = 'Shift';
           }
 
-          items.add(ShortcutItem(
-            id: const Uuid().v4(),
-            modifier: uiMod,
-            key: keyStr,
-            command: cmd
-          ));
+          items.add(
+            ShortcutItem(
+              id: const Uuid().v4(),
+              modifier: uiMod,
+              key: keyStr,
+              command: cmd,
+            ),
+          );
         }
       }
     }
@@ -102,7 +107,7 @@ class SwayConfigService implements CompositorConfigService {
   Future<void> saveShortcuts(List<ShortcutItem> items) async {
     final lines = await _readLines();
     final newLines = <String>[];
-    
+
     for (final line in lines) {
       if (!line.trim().startsWith('bindsym')) {
         newLines.add(line);
@@ -114,21 +119,37 @@ class SwayConfigService implements CompositorConfigService {
     for (final item in items) {
       String modStr = '';
       switch (item.modifier) {
-        case 'Ctrl': modStr = 'Ctrl+'; break;
-        case 'Alt': modStr = 'Mod1+'; break;
-        case 'Shift': modStr = 'Shift+'; break;
-        case 'Super': modStr = 'Mod4+'; break;
-        case 'Ctrl+Alt': modStr = 'Ctrl+Mod1+'; break;
-        case 'Ctrl+Shift': modStr = 'Ctrl+Shift+'; break;
-        case 'Super+Shift': modStr = 'Mod4+Shift+'; break;
-        default: modStr = ''; break;
+        case 'Ctrl':
+          modStr = 'Ctrl+';
+          break;
+        case 'Alt':
+          modStr = 'Mod1+';
+          break;
+        case 'Shift':
+          modStr = 'Shift+';
+          break;
+        case 'Super':
+          modStr = 'Mod4+';
+          break;
+        case 'Ctrl+Alt':
+          modStr = 'Ctrl+Mod1+';
+          break;
+        case 'Ctrl+Shift':
+          modStr = 'Ctrl+Shift+';
+          break;
+        case 'Super+Shift':
+          modStr = 'Mod4+Shift+';
+          break;
+        default:
+          modStr = '';
+          break;
       }
 
       String cmdStr = item.command;
       if (!cmdStr.startsWith('exec')) {
         cmdStr = 'exec $cmdStr';
       }
-      
+
       newLines.add('bindsym $modStr${item.key} $cmdStr');
     }
 
@@ -139,17 +160,19 @@ class SwayConfigService implements CompositorConfigService {
   Future<MouseConfig> getMouseConfig() async {
     final lines = await _readLines();
     final config = MouseConfig();
-    
+
     bool inInput = false;
 
     for (final line in lines) {
       final trimmed = line.trim();
-      if (trimmed.startsWith('input * {') || trimmed.startsWith('input type:pointer {') || trimmed.startsWith('input type:touchpad {')) {
+      if (trimmed.startsWith('input * {') ||
+          trimmed.startsWith('input type:pointer {') ||
+          trimmed.startsWith('input type:touchpad {')) {
         inInput = true;
       } else if (inInput && trimmed.startsWith('}')) {
         inInput = false;
       }
-      
+
       if (!inInput) continue;
 
       final parts = trimmed.split(RegExp(r'\s+'));
@@ -157,10 +180,13 @@ class SwayConfigService implements CompositorConfigService {
       final key = parts[0].trim();
       final val = parts[1].trim();
 
-      if (key == 'left_handed') config.primaryButton = val == 'enabled' ? 'right' : 'left';
-      if (key == 'pointer_accel') config.mousePointerSpeed = double.tryParse(val) ?? 0.0;
+      if (key == 'left_handed')
+        config.primaryButton = val == 'enabled' ? 'right' : 'left';
+      if (key == 'pointer_accel')
+        config.mousePointerSpeed = double.tryParse(val) ?? 0.0;
       if (key == 'accel_profile') config.mouseAcceleration = val != 'flat';
-      if (key == 'natural_scroll') config.scrollDirection = val == 'enabled' ? 'natural' : 'traditional';
+      if (key == 'natural_scroll')
+        config.scrollDirection = val == 'enabled' ? 'natural' : 'traditional';
       if (key == 'dwt') config.disableWhileTyping = val != 'disabled';
       if (key == 'tap') config.tapToClick = val != 'disabled';
     }
@@ -171,7 +197,7 @@ class SwayConfigService implements CompositorConfigService {
   Future<void> saveMouseConfig(MouseConfig config) async {
     final lines = await _readLines();
     final newLines = <String>[];
-    
+
     for (int i = 0; i < lines.length; i++) {
       final trimmed = lines[i].trim();
       if (trimmed.startsWith('left_handed ') ||

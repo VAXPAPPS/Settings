@@ -4,6 +4,7 @@ class PointerSpeedSlider extends StatelessWidget {
   final String label;
   final double value;
   final double max;
+  final double min;
   final ValueChanged<double> onChanged;
 
   const PointerSpeedSlider({
@@ -11,6 +12,7 @@ class PointerSpeedSlider extends StatelessWidget {
     required this.label,
     required this.value,
     this.max = 1.0,
+    this.min = -1.0,
     required this.onChanged,
   });
 
@@ -47,8 +49,8 @@ class PointerSpeedSlider extends StatelessWidget {
                   ),
                 ),
                 child: Slider(
-                  value: value.clamp(0.0, max),
-                  min: 0,
+                  value: value.clamp(min, max),
+                  min: min,
                   max: max,
                   onChanged: onChanged,
                 ),

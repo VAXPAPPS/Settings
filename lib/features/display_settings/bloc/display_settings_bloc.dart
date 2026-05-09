@@ -315,6 +315,7 @@ class DisplaySettingsBloc
               m.width == (currentMode?.width ?? 0) &&
               m.height == (currentMode?.height ?? 0))
           .map((m) => m.rateString)
+          .toSet()
           .toList();
 
       emit(state.copyWith(
@@ -366,6 +367,7 @@ class DisplaySettingsBloc
           .where((m) =>
               m.width == display.width && m.height == display.height)
           .map((m) => m.rateString)
+          .toSet()
           .toList();
 
       emit(state.copyWith(
@@ -411,6 +413,7 @@ class DisplaySettingsBloc
     final refreshRates = modes
         .where((m) => m.width == event.mode.width && m.height == event.mode.height)
         .map((m) => m.rateString)
+        .toSet()
         .toList();
 
     if (_wlrService != null) {

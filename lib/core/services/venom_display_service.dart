@@ -1,5 +1,37 @@
 import 'package:dbus/dbus.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// wl_output_transform enum (matches Wayland protocol values)
+// ─────────────────────────────────────────────────────────────────────────────
+enum WlTransform {
+  normal(0),
+  rotated90(1),
+  rotated180(2),
+  rotated270(3),
+  flipped(4),
+  flipped90(5),
+  flipped180(6),
+  flipped270(7);
+
+  const WlTransform(this.value);
+  final int value;
+
+  static WlTransform fromValue(int v) =>
+      WlTransform.values.firstWhere((e) => e.value == v,
+          orElse: () => WlTransform.normal);
+
+  String get label => switch (this) {
+    WlTransform.normal     => 'Landscape',
+    WlTransform.rotated90  => 'Portrait Left',
+    WlTransform.rotated180 => 'Landscape Inverted',
+    WlTransform.rotated270 => 'Portrait Right',
+    WlTransform.flipped    => 'Landscape (Flipped)',
+    WlTransform.flipped90  => 'Portrait Left (Flipped)',
+    WlTransform.flipped180 => 'Landscape Inverted (Flipped)',
+    WlTransform.flipped270 => 'Portrait Right (Flipped)',
+  };
+}
+
 /// نموذج معلومات الشاشة
 class DisplayInfo {
   final String name;
@@ -11,6 +43,17 @@ class DisplayInfo {
   final int x;
   final int y;
 
+  // Extended Wayland fields
+  final String make;
+  final String model;
+  final String serialNumber;
+  final int physicalWidthMm;
+  final int physicalHeightMm;
+  final int transform;           // WlTransform.value
+  final double scale;
+  final bool adaptiveSyncEnabled;
+  final bool isWaylandSource;    // true if populated from WLR protocol
+
   DisplayInfo({
     required this.name,
     required this.width,
@@ -20,6 +63,16 @@ class DisplayInfo {
     required this.isPrimary,
     required this.x,
     required this.y,
+    // Wayland extras (optional — DBus fallback keeps defaults)
+    this.make = '',
+    this.model = '',
+    this.serialNumber = '',
+    this.physicalWidthMm = 0,
+    this.physicalHeightMm = 0,
+    this.transform = 0,
+    this.scale = 1.0,
+    this.adaptiveSyncEnabled = false,
+    this.isWaylandSource = false,
   });
 
   factory DisplayInfo.fromDBus(DBusStruct struct) {
@@ -38,6 +91,8 @@ class DisplayInfo {
 
   String get resolution => '${width}x$height';
   String get rateString => '${refreshRate.toStringAsFixed(1)} Hz';
+  WlTransform get wlTransform => WlTransform.fromValue(transform);
+  String get orientationLabel => wlTransform.label;
 }
 
 /// نموذج وضع العرض
@@ -45,12 +100,16 @@ class DisplayMode {
   final int width;
   final int height;
   final double refreshRate;
+  final bool preferred;
+  final int refreshMhz; // millihertz (from Wayland)
 
   DisplayMode({
     required this.width,
     required this.height,
     required this.refreshRate,
-  });
+    this.preferred = false,
+    int? refreshMhz,
+  }) : refreshMhz = refreshMhz ?? (refreshRate * 1000).round();
 
   factory DisplayMode.fromDBus(DBusStruct struct) {
     final values = struct.children.toList();
@@ -58,6 +117,22 @@ class DisplayMode {
       width: (values[0] as DBusInt32).value,
       height: (values[1] as DBusInt32).value,
       refreshRate: (values[2] as DBusDouble).value,
+    );
+  }
+
+  /// Build from Wayland millihertz value
+  factory DisplayMode.fromWlr({
+    required int width,
+    required int height,
+    required int refreshMhz,
+    bool preferred = false,
+  }) {
+    return DisplayMode(
+      width: width,
+      height: height,
+      refreshRate: refreshMhz / 1000.0,
+      preferred: preferred,
+      refreshMhz: refreshMhz,
     );
   }
 

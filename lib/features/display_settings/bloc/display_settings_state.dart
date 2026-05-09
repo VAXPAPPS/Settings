@@ -3,6 +3,9 @@ import 'package:settings/core/services/venom_display_service.dart';
 
 enum DisplaySettingsStatus { initial, loading, loaded, error }
 
+/// Result of a test-configuration request
+enum ConfigTestResult { none, succeeded, failed, cancelled }
+
 class DisplaySettingsState extends Equatable {
   final DisplaySettingsStatus status;
   final String displayServer;
@@ -22,6 +25,13 @@ class DisplaySettingsState extends Equatable {
   final List<String> displayProfiles;
   final String? errorMessage;
 
+  // ── Wayland-specific fields ────────────────────────────────────────────────
+  final bool isWaylandBackend;
+  final bool adaptiveSyncEnabled;
+  final ConfigTestResult configTestResult;
+  final int displayPositionX;
+  final int displayPositionY;
+
   const DisplaySettingsState({
     this.status = DisplaySettingsStatus.initial,
     this.displayServer = 'Unknown',
@@ -40,6 +50,12 @@ class DisplaySettingsState extends Equatable {
     this.selectedDisplayName,
     this.displayProfiles = const [],
     this.errorMessage,
+    // Wayland extras
+    this.isWaylandBackend = false,
+    this.adaptiveSyncEnabled = false,
+    this.configTestResult = ConfigTestResult.none,
+    this.displayPositionX = 0,
+    this.displayPositionY = 0,
   });
 
   DisplayInfo? get selectedDisplay {
@@ -71,6 +87,11 @@ class DisplaySettingsState extends Equatable {
     String? selectedDisplayName,
     List<String>? displayProfiles,
     String? errorMessage,
+    bool? isWaylandBackend,
+    bool? adaptiveSyncEnabled,
+    ConfigTestResult? configTestResult,
+    int? displayPositionX,
+    int? displayPositionY,
   }) {
     return DisplaySettingsState(
       status: status ?? this.status,
@@ -91,6 +112,11 @@ class DisplaySettingsState extends Equatable {
       selectedDisplayName: selectedDisplayName ?? this.selectedDisplayName,
       displayProfiles: displayProfiles ?? this.displayProfiles,
       errorMessage: errorMessage,
+      isWaylandBackend: isWaylandBackend ?? this.isWaylandBackend,
+      adaptiveSyncEnabled: adaptiveSyncEnabled ?? this.adaptiveSyncEnabled,
+      configTestResult: configTestResult ?? this.configTestResult,
+      displayPositionX: displayPositionX ?? this.displayPositionX,
+      displayPositionY: displayPositionY ?? this.displayPositionY,
     );
   }
 
@@ -113,5 +139,10 @@ class DisplaySettingsState extends Equatable {
     selectedDisplayName,
     displayProfiles,
     errorMessage,
+    isWaylandBackend,
+    adaptiveSyncEnabled,
+    configTestResult,
+    displayPositionX,
+    displayPositionY,
   ];
 }

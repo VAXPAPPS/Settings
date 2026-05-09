@@ -129,3 +129,36 @@ class DisplayChangedExternally extends DisplaySettingsEvent {
   @override
   List<Object?> get props => [displayName];
 }
+
+// ── Wayland-specific events ───────────────────────────────────────────────────
+
+/// Toggle Variable Refresh Rate (VRR / Adaptive Sync) — requires protocol v4
+class SetAdaptiveSync extends DisplaySettingsEvent {
+  final String displayName;
+  final bool enabled;
+  const SetAdaptiveSync(this.displayName, this.enabled);
+
+  @override
+  List<Object?> get props => [displayName, enabled];
+}
+
+/// Test configuration without applying (dry-run)
+class TestConfiguration extends DisplaySettingsEvent {
+  const TestConfiguration();
+}
+
+/// Set display position in compositor space
+class SetDisplayPosition extends DisplaySettingsEvent {
+  final String displayName;
+  final int x;
+  final int y;
+  const SetDisplayPosition(this.displayName, this.x, this.y);
+
+  @override
+  List<Object?> get props => [displayName, x, y];
+}
+
+/// Wayland heads changed notification (from native callback)
+class WlrHeadsChanged extends DisplaySettingsEvent {
+  const WlrHeadsChanged();
+}

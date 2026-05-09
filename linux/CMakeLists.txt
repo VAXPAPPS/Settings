@@ -54,11 +54,14 @@ add_subdirectory(${FLUTTER_MANAGED_DIR})
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
 
+# ─── wlr-output-management Wayland backend ───────────────────────────────────
+add_subdirectory("wlr_output")
+
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
 # Run the Flutter tool portions of the build. This must not be removed.
-add_dependencies(${BINARY_NAME} flutter_assemble)
+add_dependencies(${BINARY_NAME} flutter_assemble wlr_output)
 
 # Only the install-generated bundle's copy of the executable will launch
 # correctly, since the resources must in the right relative locations. To avoid
@@ -111,6 +114,12 @@ set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
 install(DIRECTORY "${NATIVE_ASSETS_DIR}"
    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
    COMPONENT Runtime)
+
+# Install wlr_output shared library
+install(TARGETS wlr_output
+   LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+   COMPONENT Runtime
+)
 
 # Fully re-copy the assets directory on each build to avoid having stale files
 # from a previous install.

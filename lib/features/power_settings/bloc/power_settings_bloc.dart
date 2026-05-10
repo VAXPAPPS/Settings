@@ -183,7 +183,6 @@ class PowerSettingsBloc extends Bloc<PowerSettingsEvent, PowerSettingsState> {
     _batterySubscription?.cancel();
     _profileSubscription?.cancel();
     _powerService.disconnect();
-    _aetheridleService.dispose();
     return super.close();
   }
 }

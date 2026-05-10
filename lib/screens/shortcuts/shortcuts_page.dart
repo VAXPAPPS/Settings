@@ -50,7 +50,8 @@ class _ShortcutsPageState extends State<ShortcutsPage> {
           await _manager.saveShortcuts(_shortcuts);
 
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Saved & Daemon Restarted'),
                 backgroundColor: Colors.green,
@@ -69,6 +70,7 @@ class _ShortcutsPageState extends State<ShortcutsPage> {
     });
     await _manager.saveShortcuts(_shortcuts);
     if (mounted) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Shortcut Deleted'),
@@ -90,7 +92,8 @@ class _ShortcutsPageState extends State<ShortcutsPage> {
               
               await _manager.restartDaemon();
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Manual Restart Sent!')),
                 );
               }

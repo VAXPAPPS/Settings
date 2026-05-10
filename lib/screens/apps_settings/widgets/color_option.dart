@@ -24,14 +24,14 @@ class ColorOption extends StatelessWidget {
           color: color,
           shape: BoxShape.circle,
           border: Border.all(
-            color: selectedColor.value == color.value
+            color: selectedColor.toARGB32() == color.toARGB32()
                 ? Colors.white
                 : Colors.transparent,
             width: 3,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

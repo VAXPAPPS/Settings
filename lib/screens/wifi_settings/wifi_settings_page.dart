@@ -97,7 +97,8 @@ class WiFiSettingsView extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: Colors.white54),

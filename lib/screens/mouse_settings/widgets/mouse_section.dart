@@ -34,7 +34,7 @@ class MouseSection extends StatelessWidget {
                       Icon(
                         Icons.info_outline_rounded,
                         size: 18,
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                       ),
                       const SizedBox(width: 8),
                       const Text(
@@ -53,7 +53,7 @@ class MouseSection extends StatelessWidget {
                   onChanged: (value) => context.read<MouseSettingsBloc>().add(
                     SetMouseAcceleration(value),
                   ),
-                  activeColor: Colors.blueAccent,
+                  activeThumbColor: Colors.blueAccent,
                 ),
               ],
             ),

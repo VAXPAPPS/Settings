@@ -180,13 +180,16 @@ class SwayConfigService implements CompositorConfigService {
       final key = parts[0].trim();
       final val = parts[1].trim();
 
-      if (key == 'left_handed')
+      if (key == 'left_handed') {
         config.primaryButton = val == 'enabled' ? 'right' : 'left';
-      if (key == 'pointer_accel')
+      }
+      if (key == 'pointer_accel') {
         config.mousePointerSpeed = double.tryParse(val) ?? 0.0;
+      }
       if (key == 'accel_profile') config.mouseAcceleration = val != 'flat';
-      if (key == 'natural_scroll')
+      if (key == 'natural_scroll') {
         config.scrollDirection = val == 'enabled' ? 'natural' : 'traditional';
+      }
       if (key == 'dwt') config.disableWhileTyping = val != 'disabled';
       if (key == 'tap') config.tapToClick = val != 'disabled';
     }

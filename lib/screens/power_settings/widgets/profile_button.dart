@@ -33,17 +33,17 @@ class ProfileButton extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
                 color: isActive
-                    ? color.withOpacity(0.14)
-                    : Colors.white.withOpacity(0.02),
+                    ? color.withValues(alpha: 0.14)
+                    : Colors.white.withValues(alpha: 0.02),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isActive
-                      ? color.withOpacity(0.35)
+                      ? color.withValues(alpha: 0.35)
                       : Colors.transparent,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(isActive ? 0.18 : 0.06),
+                    color: Colors.black.withValues(alpha: isActive ? 0.18 : 0.06),
                     blurRadius: isActive ? 14 : 4,
                     offset: const Offset(0, 6),
                   ),
@@ -67,8 +67,8 @@ class ProfileButton extends StatelessWidget {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  color.withOpacity(0.28),
-                                  color.withOpacity(0.06),
+                                  color.withValues(alpha: 0.28),
+                                  color.withValues(alpha: 0.06),
                                 ],
                               )
                             : const LinearGradient(
@@ -81,7 +81,7 @@ class ProfileButton extends StatelessWidget {
                               ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(
+                            color: Colors.black.withValues(alpha: 
                               isActive ? 0.22 : 0.08,
                             ),
                             blurRadius: isActive ? 14 : 6,

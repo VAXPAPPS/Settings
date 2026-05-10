@@ -14,7 +14,8 @@ class SoundsSection extends StatelessWidget {
         ClickableItem(
           label: 'Volume Levels',
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
+            // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Volume Levels - Coming soon')),
             );
           },
@@ -24,7 +25,8 @@ class SoundsSection extends StatelessWidget {
           label: 'Alert Sound',
           value: 'Default',
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
+            // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Alert Sound - Coming soon')),
             );
           },

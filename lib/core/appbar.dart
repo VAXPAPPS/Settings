@@ -109,7 +109,7 @@ class _VenomWindowButtonState extends State<VenomWindowButton> {
                 ? [
                     BoxShadow(
                       
-                      color: widget.color.withOpacity(0.8),
+                      color: widget.color.withValues(alpha: 0.8),
                       blurRadius: 8,
                       spreadRadius: 1,
                     )
@@ -124,7 +124,7 @@ class _VenomWindowButtonState extends State<VenomWindowButton> {
                 widget.icon,
                 size: 10,
                 
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
               ),
             ),
           ),

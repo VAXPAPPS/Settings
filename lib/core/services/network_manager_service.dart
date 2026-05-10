@@ -188,6 +188,7 @@ class NetworkManagerService {
   static const _nmWifiIface = 'org.freedesktop.NetworkManager.Device.Wireless';
   static const _nmEthernetIface = 'org.freedesktop.NetworkManager.Device.Wired';
   static const _nmAPiface = 'org.freedesktop.NetworkManager.AccessPoint';
+  // ignore: unused_field
   static const _nmActiveConnIface =
       'org.freedesktop.NetworkManager.Connection.Active';
   static const _nmIP4ConfigIface = 'org.freedesktop.NetworkManager.IP4Config';
@@ -545,6 +546,7 @@ class NetworkManagerService {
       // Build an ephemeral connection profile
       final connection = _buildWifiConnectionProfile(ssid, password);
 
+      // ignore: unused_local_variable
       final settings = DBusRemoteObject(
         _client,
         name: _nmService,
@@ -655,6 +657,7 @@ class NetworkManagerService {
       if (connPath == null) return false;
 
       final prefix = _subnetToPrefix(subnet);
+      // ignore: unused_local_variable
       final updatedSettings = DBusDict(
         DBusSignature('s'),
         DBusSignature('v'),
@@ -671,6 +674,7 @@ class NetworkManagerService {
 
       // Use Update2 if available, otherwise Update
       final conn = _obj(connPath.value);
+      // ignore: unused_local_variable
       final settings = _buildStaticIPSettings(ip, prefix, gateway, dns);
       await conn.callMethod(_nmSettingsConnIface, 'Update', [settings]);
       return true;
@@ -756,7 +760,9 @@ class NetworkManagerService {
           'DeviceType',
         );
         if (typeVal is! DBusUint32 ||
-            typeVal.value != _deviceTypeEthernet) continue;
+            typeVal.value != _deviceTypeEthernet) {
+          continue;
+        }
 
         final props = await _getAllProps(path.value, _nmDeviceIface);
         final ethProps = await _getAllProps(path.value, _nmEthernetIface);
@@ -1032,8 +1038,11 @@ class NetworkManagerService {
       }
       int prefix = 0;
       for (int i = 31; i >= 0; i--) {
-        if ((mask >> i) & 1 == 1) prefix++;
-        else break;
+        if ((mask >> i) & 1 == 1) {
+          prefix++;
+        } else {
+          break;
+        }
       }
       return prefix;
     } catch (_) {

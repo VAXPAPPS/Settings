@@ -245,7 +245,7 @@ class _InterfaceTile extends StatelessWidget {
                 },
                 activeTrackColor: Colors.greenAccent.withValues(alpha: 0.5),
                 // ignore: deprecated_member_use
-                activeColor: Colors.greenAccent,
+                activeThumbColor: Colors.greenAccent,
               ),
             ],
           ),

@@ -64,7 +64,7 @@ class _ShortcutDialogState extends State<ShortcutDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
-            value: _modifiers.contains(_selectedMod) ? _selectedMod : 'None',
+            initialValue: _modifiers.contains(_selectedMod) ? _selectedMod : 'None',
             dropdownColor: const Color.fromARGB(255, 40, 40, 40),
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
@@ -113,7 +113,8 @@ class _ShortcutDialogState extends State<ShortcutDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
           child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
         ),
         ElevatedButton(
@@ -130,7 +131,8 @@ class _ShortcutDialogState extends State<ShortcutDialog> {
               command: _cmdController.text,
             );
             widget.onSave(newItem);
-            Navigator.pop(context);
+            // ignore: use_build_context_synchronously
+      Navigator.pop(context);
           },
           child: const Text(
             'Save & Apply',

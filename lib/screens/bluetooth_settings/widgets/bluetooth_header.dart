@@ -71,7 +71,7 @@ class BluetoothHeader extends StatelessWidget {
                       activeTrackColor: Colors.blueAccent.withValues(
                         alpha: 0.5,
                       ),
-                      activeColor: Colors.blueAccent,
+                      activeThumbColor: Colors.blueAccent,
                     ),
                   ],
                 ),

@@ -23,7 +23,7 @@ class AppsSettingsHeader extends StatelessWidget {
           icon: const Icon(Icons.restore, color: Colors.white),
           label: const Text("Reset to Default"),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.redAccent.withOpacity(0.8),
+            backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),

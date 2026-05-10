@@ -111,7 +111,8 @@ class _NetworkSettingsSheetState extends State<NetworkSettingsSheet> {
       if (mounted) {
         // Call onForget BEFORE pop to refresh data while context is valid
         widget.onForget?.call();
-        Navigator.pop(context);
+        // ignore: use_build_context_synchronously
+      Navigator.pop(context);
       }
     }
   }
@@ -291,7 +292,7 @@ class _NetworkSettingsSheetState extends State<NetworkSettingsSheet> {
         ),
         Switch(
           value: value,
-          activeColor: Colors.tealAccent,
+          activeThumbColor: Colors.tealAccent,
           onChanged: onChanged,
         ),
       ],

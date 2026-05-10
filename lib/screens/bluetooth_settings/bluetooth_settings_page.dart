@@ -30,7 +30,8 @@ class BluetoothSettingsView extends StatelessWidget {
           current.errorMessage != null,
       listener: (context, state) {
         if (state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
               backgroundColor: Colors.red,

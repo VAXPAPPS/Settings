@@ -41,7 +41,7 @@ class PointerSpeedSlider extends StatelessWidget {
                 data: SliderThemeData(
                   trackHeight: 4,
                   activeTrackColor: Colors.blueAccent,
-                  inactiveTrackColor: Colors.white.withOpacity(0.2),
+                  inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
                   thumbColor: Colors.white,
                   overlayShape: SliderComponentShape.noOverlay,
                   thumbShape: const RoundSliderThumbShape(

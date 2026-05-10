@@ -177,7 +177,7 @@ class _BluetoothManagerDialogState extends State<BluetoothManagerDialog> {
 
       
       
-      DBusValue? _unwrap(DBusValue? v) {
+      DBusValue? unwrap(DBusValue? v) {
         if (v == null) return null;
         if (v is DBusVariant) return v.value;
         return v;
@@ -198,28 +198,28 @@ class _BluetoothManagerDialogState extends State<BluetoothManagerDialog> {
         final props = deviceIface.children;
 
         String name = 'Unknown Device';
-        final aliasV = _unwrap(props[DBusString('Alias')]);
-        final nameV = _unwrap(props[DBusString('Name')]);
+        final aliasV = unwrap(props[DBusString('Alias')]);
+        final nameV = unwrap(props[DBusString('Name')]);
         if (aliasV is DBusString) {
           name = aliasV.value;
-        } else if (nameV is DBusString)
-          
+        } else if (nameV is DBusString) {
           name = nameV.value;
+        }
 
         String address = '??:??:??:??:??:??';
-        final addrV = _unwrap(props[DBusString('Address')]);
+        final addrV = unwrap(props[DBusString('Address')]);
         if (addrV is DBusString) address = addrV.value;
 
         bool connected = false;
-        final connV = _unwrap(props[DBusString('Connected')]);
+        final connV = unwrap(props[DBusString('Connected')]);
         if (connV is DBusBoolean) connected = connV.value;
 
         bool paired = false;
-        final pairV = _unwrap(props[DBusString('Paired')]);
+        final pairV = unwrap(props[DBusString('Paired')]);
         if (pairV is DBusBoolean) paired = pairV.value;
 
         int rssi = -100;
-        final rssiV = _unwrap(props[DBusString('RSSI')]);
+        final rssiV = unwrap(props[DBusString('RSSI')]);
         if (rssiV is DBusInt16) rssi = rssiV.value;
 
         newDevices.add({
@@ -284,7 +284,8 @@ class _BluetoothManagerDialogState extends State<BluetoothManagerDialog> {
       _startScan();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Failed: ${e.toString().split(']').last.trim()}"),
             backgroundColor: Colors.red,
@@ -373,7 +374,7 @@ class _BluetoothManagerDialogState extends State<BluetoothManagerDialog> {
                       child: Text(
                         "No devices found",
                         
-                        style: TextStyle(color: Colors.white.withOpacity(0.3)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                       ),
                     )
                   : ListView.builder(
@@ -387,9 +388,9 @@ class _BluetoothManagerDialogState extends State<BluetoothManagerDialog> {
                           decoration: BoxDecoration(
                             color: isConnected
                                 
-                                ? Colors.blueAccent.withOpacity(0.15)
+                                ? Colors.blueAccent.withValues(alpha: 0.15)
                                 
-                                : Colors.white.withOpacity(0.05),
+                                : Colors.white.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: ListTile(
@@ -414,7 +415,7 @@ class _BluetoothManagerDialogState extends State<BluetoothManagerDialog> {
                               "${dev['address']} ${dev['rssi'] > -100 ? '(${dev['rssi']} dBm)' : ''}",
                               style: TextStyle(
                                 
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: 0.5),
                                 fontSize: 12,
                               ),
                             ),

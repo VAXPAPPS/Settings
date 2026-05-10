@@ -89,7 +89,8 @@ class _UsersDialogState extends State<UsersDialog> {
 
       if (result.exitCode == 0) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Password changed successfully for $username'),
               backgroundColor: Colors.green,
@@ -98,7 +99,8 @@ class _UsersDialogState extends State<UsersDialog> {
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Failed to change password: ${result.stderr}'),
               backgroundColor: Colors.red,
@@ -108,7 +110,8 @@ class _UsersDialogState extends State<UsersDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
@@ -159,7 +162,8 @@ class _UsersDialogState extends State<UsersDialog> {
 
       if (createResult.exitCode != 0) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Failed to create user: ${createResult.stderr}'),
               backgroundColor: Colors.red,
@@ -181,7 +185,8 @@ class _UsersDialogState extends State<UsersDialog> {
 
       if (passwdResult.exitCode == 0) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('User $username created successfully'),
               backgroundColor: Colors.green,
@@ -192,7 +197,8 @@ class _UsersDialogState extends State<UsersDialog> {
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 'User created but password setting failed: ${passwdResult.stderr}',
@@ -205,7 +211,8 @@ class _UsersDialogState extends State<UsersDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
@@ -290,7 +297,8 @@ class _UsersDialogState extends State<UsersDialog> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: Colors.white54),
@@ -299,7 +307,8 @@ class _UsersDialogState extends State<UsersDialog> {
             TextButton(
               onPressed: () {
                 if (confirm && password != confirmPassword) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Passwords do not match'),
                       backgroundColor: Colors.red,
@@ -349,7 +358,8 @@ class _UsersDialogState extends State<UsersDialog> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: Colors.white54),
@@ -394,7 +404,7 @@ class _UsersDialogState extends State<UsersDialog> {
                   ? Center(
                       child: Text(
                         'No users found',
-                        style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                       ),
                     )
                   : ListView.builder(
@@ -404,7 +414,7 @@ class _UsersDialogState extends State<UsersDialog> {
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.05),
+                            color: Colors.white.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: ListTile(
@@ -431,7 +441,7 @@ class _UsersDialogState extends State<UsersDialog> {
                             subtitle: Text(
                               'UID: ${user['uid']}',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withValues(alpha: 0.6),
                               ),
                             ),
                             trailing: PopupMenuButton<String>(
@@ -478,7 +488,8 @@ class _UsersDialogState extends State<UsersDialog> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
                   child: const Text(
                     'Close',
                     style: TextStyle(color: Colors.white70),

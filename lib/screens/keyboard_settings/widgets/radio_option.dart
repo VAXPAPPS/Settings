@@ -19,11 +19,10 @@ class RadioOption extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Row(
         children: [
-          Radio(
-            value: isSelected,
-            groupValue: true,
-            onChanged: (_) => onTap(),
-            activeColor: Colors.blueAccent,
+          Icon(
+            isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+            color: isSelected ? Colors.blueAccent : Colors.white54,
+            size: 20,
           ),
           const SizedBox(width: 8),
           Expanded(

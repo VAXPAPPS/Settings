@@ -45,7 +45,7 @@ class MouseSettingsView extends StatelessWidget {
               'Configure input device settings',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 48),

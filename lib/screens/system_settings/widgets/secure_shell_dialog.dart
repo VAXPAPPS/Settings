@@ -43,6 +43,7 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
       setState(() => _sshEnabled = enabled);
     } catch (e) {
       debugPrint('Set SSH error: $e');
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Requires administrator privileges')),
       );
@@ -85,13 +86,13 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
                     return Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         snapshot.data!,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 12,
                           fontFamily: 'monospace',
                         ),
@@ -107,7 +108,8 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
                   child: const Text(
                     'Close',
                     style: TextStyle(color: Colors.white70),
@@ -163,7 +165,7 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
                       description,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -173,7 +175,7 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
             Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: Colors.blueAccent,
+              activeThumbColor: Colors.blueAccent,
             ),
           ],
         ),

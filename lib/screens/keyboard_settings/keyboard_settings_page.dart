@@ -77,7 +77,8 @@ class _KeyboardSettingsViewState extends State<KeyboardSettingsView> {
           await _shortcutManager.saveShortcuts(_shortcuts);
 
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Saved to wayfire.ini'),
                 backgroundColor: Colors.green,
@@ -96,6 +97,7 @@ class _KeyboardSettingsViewState extends State<KeyboardSettingsView> {
     });
     await _shortcutManager.saveShortcuts(_shortcuts);
     if (mounted) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Shortcut Deleted'),

@@ -84,6 +84,7 @@ class _DateTimeDialogState extends State<DateTimeDialog> {
       setState(() => _timezone = tz);
     } catch (e) {
       debugPrint('Set timezone error: $e');
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Requires administrator privileges')),
       );
@@ -129,7 +130,8 @@ class _DateTimeDialogState extends State<DateTimeDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
                   child: const Text(
                     'Close',
                     style: TextStyle(color: Colors.white70),
@@ -162,7 +164,7 @@ class _DateTimeDialogState extends State<DateTimeDialog> {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: Colors.blueAccent,
+          activeThumbColor: Colors.blueAccent,
         ),
       ],
     );
@@ -194,7 +196,7 @@ class _DateTimeDialogState extends State<DateTimeDialog> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: DropdownButton<String>(

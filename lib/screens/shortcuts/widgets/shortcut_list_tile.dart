@@ -21,9 +21,9 @@ class ShortcutListTile extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.cyan.withOpacity(0.1),
+          color: Colors.cyan.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.cyan.withOpacity(0.3)),
+          border: Border.all(color: Colors.cyan.withValues(alpha: 0.3)),
         ),
         child: Text(
           '${item.modifier == "None" ? "" : "${item.modifier} + "}${item.key}',

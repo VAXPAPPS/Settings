@@ -60,13 +60,13 @@ class _AppsSettingsPageState extends State<AppsSettingsPage> {
               onColorChanged: (color) {
                 setState(() {
                   _currentColor = color;
-                  _updateConfig(color.withOpacity(_opacity));
+                  _updateConfig(color.withValues(alpha: _opacity));
                 });
               },
               onOpacityChanged: (value) {
                 setState(() {
                   _opacity = value;
-                  _updateConfig(_currentColor.withOpacity(_opacity));
+                  _updateConfig(_currentColor.withValues(alpha: _opacity));
                 });
               },
               onPickCustomColor: () => _showColorPicker(context),
@@ -115,8 +115,9 @@ class _AppsSettingsPageState extends State<AppsSettingsPage> {
             ElevatedButton(
               child: const Text('Got it'),
               onPressed: () {
-                _updateConfig(_currentColor.withOpacity(_opacity));
-                Navigator.of(context).pop();
+                _updateConfig(_currentColor.withValues(alpha: _opacity));
+                // ignore: use_build_context_synchronously
+      Navigator.of(context).pop();
               },
             ),
           ],
@@ -149,7 +150,8 @@ class _AppsSettingsPageState extends State<AppsSettingsPage> {
               child: const Text('Got it'),
               onPressed: () {
                 _updateTextConfig(_currentTextColor);
-                Navigator.of(context).pop();
+                // ignore: use_build_context_synchronously
+      Navigator.of(context).pop();
               },
             ),
           ],
@@ -160,13 +162,13 @@ class _AppsSettingsPageState extends State<AppsSettingsPage> {
 
   Future<void> _updateConfig(Color color) async {
     String hex =
-        '#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+        '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
     await VenomConfig().set('system.background_color', hex);
   }
 
   Future<void> _updateTextConfig(Color color) async {
     String hex =
-        '#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+        '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
     await VenomConfig().set('system.text_color', hex);
   }
 

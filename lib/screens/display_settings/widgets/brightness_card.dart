@@ -43,7 +43,7 @@ class BrightnessCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.brightness_low_rounded,
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     size: 20,
                   ),
                   Expanded(
@@ -51,7 +51,7 @@ class BrightnessCard extends StatelessWidget {
                       data: SliderThemeData(
                         trackHeight: 4,
                         activeTrackColor: Colors.blueAccent,
-                        inactiveTrackColor: Colors.white.withOpacity(0.2),
+                        inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
                         thumbColor: Colors.white,
                         overlayShape: SliderComponentShape.noOverlay,
                         thumbShape: const RoundSliderThumbShape(
@@ -70,7 +70,7 @@ class BrightnessCard extends StatelessWidget {
                   ),
                   Icon(
                     Icons.brightness_high_rounded,
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     size: 20,
                   ),
                 ],

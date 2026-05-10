@@ -8,7 +8,8 @@ class TestButton extends StatelessWidget {
     return Center(
       child: ElevatedButton.icon(
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
+          // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Test your mouse settings here')),
           );
         },

@@ -137,7 +137,8 @@ class _SystemAboutDialogState extends State<SystemAboutDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
                   child: const Text(
                     'Close',
                     style: TextStyle(color: Colors.white70),
@@ -161,7 +162,7 @@ class _SystemAboutDialogState extends State<SystemAboutDialog> {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ),
         ),

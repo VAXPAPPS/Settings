@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:settings/screens/shortcuts/ShortcutsPage.dart';
+import 'package:settings/screens/shortcuts/shortcuts_page.dart';
 import 'package:settings/screens/keyboard_settings/widgets/section_container.dart';
 import 'package:settings/screens/keyboard_settings/widgets/clickable_item.dart';
 

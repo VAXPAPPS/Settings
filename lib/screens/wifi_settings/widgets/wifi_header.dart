@@ -31,7 +31,7 @@ class WifiHeader extends StatelessWidget {
                   'Manage wireless networks',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                   ),
                 ),
                 Row(
@@ -40,7 +40,7 @@ class WifiHeader extends StatelessWidget {
                       state.wifiEnabled ? 'On' : 'Off',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -50,7 +50,7 @@ class WifiHeader extends StatelessWidget {
                       onChanged: (value) => context
                           .read<WiFiSettingsBloc>()
                           .add(ToggleWiFi(value)),
-                      activeColor: const Color.fromARGB(255, 100, 200, 255),
+                      activeThumbColor: const Color.fromARGB(255, 100, 200, 255),
                     ),
                   ],
                 ),

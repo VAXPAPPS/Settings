@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dbus/dbus.dart';
 
 /// خدمة الاتصال بـ Venom Power Daemon عبر D-Bus
@@ -24,7 +25,7 @@ class PowerService {
       _isConnected = true;
       return true;
     } catch (e) {
-      print('Error connecting to Power daemon: $e');
+      debugPrint('Error connecting to Power daemon: $e');
       _isConnected = false;
       return false;
     }
@@ -47,7 +48,7 @@ class PowerService {
       final result = await _object.callMethod(interfaceName, 'Shutdown', []);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('Shutdown error: $e');
+      debugPrint('Shutdown error: $e');
       return false;
     }
   }
@@ -57,7 +58,7 @@ class PowerService {
       final result = await _object.callMethod(interfaceName, 'Reboot', []);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('Reboot error: $e');
+      debugPrint('Reboot error: $e');
       return false;
     }
   }
@@ -67,7 +68,7 @@ class PowerService {
       final result = await _object.callMethod(interfaceName, 'Suspend', []);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('Suspend error: $e');
+      debugPrint('Suspend error: $e');
       return false;
     }
   }
@@ -77,7 +78,7 @@ class PowerService {
       final result = await _object.callMethod(interfaceName, 'Hibernate', []);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('Hibernate error: $e');
+      debugPrint('Hibernate error: $e');
       return false;
     }
   }
@@ -87,7 +88,7 @@ class PowerService {
       final result = await _object.callMethod(interfaceName, 'Logout', []);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('Logout error: $e');
+      debugPrint('Logout error: $e');
       return false;
     }
   }
@@ -97,7 +98,7 @@ class PowerService {
       final result = await _object.callMethod(interfaceName, 'LockScreen', []);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('LockScreen error: $e');
+      debugPrint('LockScreen error: $e');
       return false;
     }
   }
@@ -115,7 +116,7 @@ class PowerService {
       );
       return result.values.first.asInt32();
     } catch (e) {
-      print('GetBrightness error: $e');
+      debugPrint('GetBrightness error: $e');
       return -1;
     }
   }
@@ -127,7 +128,7 @@ class PowerService {
       ]);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('SetBrightness error: $e');
+      debugPrint('SetBrightness error: $e');
       return false;
     }
   }
@@ -141,7 +142,7 @@ class PowerService {
       );
       return result.values.first.asInt32();
     } catch (e) {
-      print('GetMaxBrightness error: $e');
+      debugPrint('GetMaxBrightness error: $e');
       return -1;
     }
   }
@@ -159,7 +160,7 @@ class PowerService {
       );
       return result.values.first.asBoolean();
     } catch (e) {
-      print('IsKeyboardBacklightSupported error: $e');
+      debugPrint('IsKeyboardBacklightSupported error: $e');
       return false;
     }
   }
@@ -173,7 +174,7 @@ class PowerService {
       );
       return result.values.first.asInt32();
     } catch (e) {
-      print('GetKeyboardBrightness error: $e');
+      debugPrint('GetKeyboardBrightness error: $e');
       return -1;
     }
   }
@@ -187,7 +188,7 @@ class PowerService {
       );
       return result.values.first.asBoolean();
     } catch (e) {
-      print('SetKeyboardBrightness error: $e');
+      debugPrint('SetKeyboardBrightness error: $e');
       return false;
     }
   }
@@ -201,7 +202,7 @@ class PowerService {
       );
       return result.values.first.asInt32();
     } catch (e) {
-      print('GetKeyboardMaxBrightness error: $e');
+      debugPrint('GetKeyboardMaxBrightness error: $e');
       return -1;
     }
   }
@@ -223,7 +224,7 @@ class PowerService {
         'timeToEmpty': result.values[2].asInt64(),
       };
     } catch (e) {
-      print('GetBatteryInfo error: $e');
+      debugPrint('GetBatteryInfo error: $e');
       return {'percentage': 0.0, 'charging': false, 'timeToEmpty': 0};
     }
   }
@@ -237,7 +238,7 @@ class PowerService {
       );
       return result.values.first.asBoolean();
     } catch (e) {
-      print('GetPowerSource error: $e');
+      debugPrint('GetPowerSource error: $e');
       return false;
     }
   }
@@ -251,7 +252,7 @@ class PowerService {
       final result = await _object.callMethod(interfaceName, 'GetLidState', []);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('GetLidState error: $e');
+      debugPrint('GetLidState error: $e');
       return false;
     }
   }
@@ -269,7 +270,7 @@ class PowerService {
         'screenBlanked': result.values[2].asBoolean(),
       };
     } catch (e) {
-      print('GetIdleState error: $e');
+      debugPrint('GetIdleState error: $e');
       return {'isIdle': false, 'screenDimmed': false, 'screenBlanked': false};
     }
   }
@@ -291,7 +292,7 @@ class PowerService {
         'suspend': result.values[2].asUint32(),
       };
     } catch (e) {
-      print('GetIdleTimeouts error: $e');
+      debugPrint('GetIdleTimeouts error: $e');
       return {'dim': 0, 'blank': 0, 'suspend': 0};
     }
   }
@@ -304,7 +305,7 @@ class PowerService {
         DBusUint32(suspend),
       ]);
     } catch (e) {
-      print('SetIdleTimeouts error: $e');
+      debugPrint('SetIdleTimeouts error: $e');
     }
   }
 
@@ -312,7 +313,7 @@ class PowerService {
     try {
       await _object.callMethod(interfaceName, 'SimulateActivity', []);
     } catch (e) {
-      print('SimulateActivity error: $e');
+      debugPrint('SimulateActivity error: $e');
     }
   }
 
@@ -329,7 +330,7 @@ class PowerService {
       ]);
       return result.values.first.asUint32();
     } catch (e) {
-      print('Inhibit error: $e');
+      debugPrint('Inhibit error: $e');
       return 0;
     }
   }
@@ -340,7 +341,7 @@ class PowerService {
         DBusUint32(cookie),
       ]);
     } catch (e) {
-      print('UnInhibit error: $e');
+      debugPrint('UnInhibit error: $e');
     }
   }
 
@@ -353,7 +354,7 @@ class PowerService {
       final result = await _object.callMethod(interfaceName, 'SaveConfig', []);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('SaveConfig error: $e');
+      debugPrint('SaveConfig error: $e');
       return false;
     }
   }
@@ -367,7 +368,7 @@ class PowerService {
       );
       return result.values.first.asBoolean();
     } catch (e) {
-      print('ReloadConfig error: $e');
+      debugPrint('ReloadConfig error: $e');
       return false;
     }
   }
@@ -381,7 +382,7 @@ class PowerService {
       final result = await _object.callMethod(interfaceName, 'GetVersion', []);
       return result.values.first.asString();
     } catch (e) {
-      print('GetVersion error: $e');
+      debugPrint('GetVersion error: $e');
       return 'Unknown';
     }
   }
@@ -396,7 +397,7 @@ class PowerService {
       final array = result.values.first as DBusArray;
       return array.children.map((v) => v.asString()).toList();
     } catch (e) {
-      print('GetCapabilities error: $e');
+      debugPrint('GetCapabilities error: $e');
       return [];
     }
   }
@@ -477,7 +478,7 @@ class PowerService {
       );
       return result.values.first.asBoolean();
     } catch (e) {
-      print('IsProfilesAvailable error: $e');
+      debugPrint('IsProfilesAvailable error: $e');
       return false;
     }
   }
@@ -491,7 +492,7 @@ class PowerService {
       );
       return result.values.first.asString();
     } catch (e) {
-      print('GetActiveProfile error: $e');
+      debugPrint('GetActiveProfile error: $e');
       return 'unknown';
     }
   }
@@ -505,7 +506,7 @@ class PowerService {
       );
       return result.values.first.asBoolean();
     } catch (e) {
-      print('SetActiveProfile error: $e');
+      debugPrint('SetActiveProfile error: $e');
       return false;
     }
   }
@@ -516,7 +517,7 @@ class PowerService {
       final array = result.values.first as DBusArray;
       return array.children.map((v) => v.asString()).toList();
     } catch (e) {
-      print('GetProfiles error: $e');
+      debugPrint('GetProfiles error: $e');
       return [];
     }
   }
@@ -530,7 +531,7 @@ class PowerService {
       );
       return result.values.first.asString();
     } catch (e) {
-      print('GetPerformanceInhibited error: $e');
+      debugPrint('GetPerformanceInhibited error: $e');
       return '';
     }
   }

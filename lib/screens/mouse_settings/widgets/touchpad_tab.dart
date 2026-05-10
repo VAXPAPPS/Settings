@@ -15,14 +15,14 @@ class TouchpadTab extends StatelessWidget {
           height: 120,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
             child: Icon(
               Icons.touch_app_rounded,
               size: 64,
-              color: Colors.blueAccent.withOpacity(0.5),
+              color: Colors.blueAccent.withValues(alpha: 0.5),
             ),
           ),
         ),

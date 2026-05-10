@@ -20,7 +20,8 @@ class SpecialCharacterEntrySection extends StatelessWidget {
               label: 'Alternate Characters Key',
               value: state.alternateCharactersKey,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
+                // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
                       'Alternate Characters Key settings - Coming soon',
@@ -34,7 +35,8 @@ class SpecialCharacterEntrySection extends StatelessWidget {
               label: 'Compose Key',
               value: state.composeKey,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
+                // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Compose Key settings - Coming soon'),
                   ),

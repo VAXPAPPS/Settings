@@ -98,7 +98,8 @@ class _RemoteDesktopDialogState extends State<RemoteDesktopDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
                   child: const Text(
                     'Close',
                     style: TextStyle(color: Colors.white70),
@@ -142,7 +143,7 @@ class _RemoteDesktopDialogState extends State<RemoteDesktopDialog> {
                       description,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -152,7 +153,7 @@ class _RemoteDesktopDialogState extends State<RemoteDesktopDialog> {
             Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: Colors.blueAccent,
+              activeThumbColor: Colors.blueAccent,
             ),
           ],
         ),

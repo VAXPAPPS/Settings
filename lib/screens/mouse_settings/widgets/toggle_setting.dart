@@ -37,7 +37,7 @@ class ToggleSetting extends StatelessWidget {
                   description!,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -47,7 +47,7 @@ class ToggleSetting extends StatelessWidget {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: Colors.blueAccent,
+          activeThumbColor: Colors.blueAccent,
         ),
       ],
     );

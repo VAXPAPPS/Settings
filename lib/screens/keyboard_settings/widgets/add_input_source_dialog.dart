@@ -49,7 +49,8 @@ class _AddInputSourceDialogState extends State<AddInputSourceDialog> {
             Row(
               children: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => // ignore: use_build_context_synchronously
+      Navigator.pop(context),
                   child: const Text(
                     'Cancel',
                     style: TextStyle(color: Colors.white70),
@@ -91,7 +92,7 @@ class _AddInputSourceDialogState extends State<AddInputSourceDialog> {
                 hintStyle: const TextStyle(color: Colors.white54),
                 prefixIcon: const Icon(Icons.search, color: Colors.white54),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.1),
+                fillColor: Colors.white.withValues(alpha: 0.1),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -127,7 +128,7 @@ class _AddInputSourceDialogState extends State<AddInputSourceDialog> {
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Colors.blueAccent.withOpacity(0.2)
+                            ? Colors.blueAccent.withValues(alpha: 0.2)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                       ),

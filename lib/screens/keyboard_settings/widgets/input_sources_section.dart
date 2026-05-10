@@ -28,7 +28,7 @@ class InputSourcesSection extends StatelessWidget {
                 child: Text(
                   'No input sources configured',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 14,
                   ),
                 ),
@@ -43,7 +43,7 @@ class InputSourcesSection extends StatelessWidget {
               icon: const Icon(Icons.add, size: 18),
               label: const Text('Add Input Source...'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white.withOpacity(0.1),
+                backgroundColor: Colors.white.withValues(alpha: 0.1),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,

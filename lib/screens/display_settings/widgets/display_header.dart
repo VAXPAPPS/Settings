@@ -20,7 +20,7 @@ class DisplayHeader extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           'Manage your display settings',
-          style: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.6)),
+          style: TextStyle(fontSize: 16, color: Colors.white.withValues(alpha: 0.6)),
         ),
       ],
     );

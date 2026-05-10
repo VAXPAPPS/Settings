@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dbus/dbus.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -201,7 +202,7 @@ class DisplayService {
       _isConnected = true;
       return true;
     } catch (e) {
-      print('Error connecting: $e');
+      debugPrint('Error connecting: $e');
       return false;
     }
   }
@@ -225,7 +226,7 @@ class DisplayService {
           .map((v) => DisplayInfo.fromDBus(v as DBusStruct))
           .toList();
     } catch (e) {
-      print('GetDisplays error: $e');
+      debugPrint('GetDisplays error: $e');
       return [];
     }
   }
@@ -239,7 +240,7 @@ class DisplayService {
       );
       return DisplayInfo.fromDBus(result.values.first as DBusStruct);
     } catch (e) {
-      print('GetPrimaryDisplay error: $e');
+      debugPrint('GetPrimaryDisplay error: $e');
       return null;
     }
   }
@@ -251,7 +252,7 @@ class DisplayService {
       ]);
       return DisplayInfo.fromDBus(result.values.first as DBusStruct);
     } catch (e) {
-      print('GetDisplayInfo error: $e');
+      debugPrint('GetDisplayInfo error: $e');
       return null;
     }
   }
@@ -266,7 +267,7 @@ class DisplayService {
           .map((v) => DisplayMode.fromDBus(v as DBusStruct))
           .toList();
     } catch (e) {
-      print('GetModes error: $e');
+      debugPrint('GetModes error: $e');
       return [];
     }
   }
@@ -310,7 +311,7 @@ class DisplayService {
         (result.values.first as DBusInt32).value,
       );
     } catch (e) {
-      print('GetRotation error: $e');
+      debugPrint('GetRotation error: $e');
       return RotationType.normal;
     }
   }
@@ -349,7 +350,7 @@ class DisplayService {
       ]);
       return (result.values.first as DBusDouble).value;
     } catch (e) {
-      print('GetScale error: $e');
+      debugPrint('GetScale error: $e');
       return 1.0;
     }
   }
@@ -370,7 +371,7 @@ class DisplayService {
       );
       return NightLightSettings.fromDBus(result.values.first as DBusStruct);
     } catch (e) {
-      print('GetNightLight error: $e');
+      debugPrint('GetNightLight error: $e');
       return NightLightSettings(enabled: false, temperature: 6500);
     }
   }
@@ -396,7 +397,7 @@ class DisplayService {
       final array = result.values.first as DBusArray;
       return array.children.map((v) => (v as DBusString).value).toList();
     } catch (e) {
-      print('GetProfiles error: $e');
+      debugPrint('GetProfiles error: $e');
       return [];
     }
   }
@@ -436,7 +437,7 @@ class DisplayService {
       final result = await _object.callMethod(interfaceName, method, args);
       return result.values.first.asBoolean();
     } catch (e) {
-      print('$method error: $e');
+      debugPrint('$method error: $e');
       return false;
     }
   }

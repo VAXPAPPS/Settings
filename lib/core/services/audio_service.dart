@@ -640,14 +640,7 @@ class _PulseAudioClient {
         Pointer<_PaCVolume> Function(Pointer<_PaCVolume>, Uint32, Uint32),
         Pointer<_PaCVolume> Function(Pointer<_PaCVolume>, int, int)
       >('pa_cvolume_set');
-  static final _paSwVolumeFromLinear = _lib
-      .lookupFunction<Uint32 Function(Double), int Function(double)>(
-        'pa_sw_volume_from_linear',
-      );
-  static final _paSwVolumeToLinear = _lib
-      .lookupFunction<Double Function(Uint32), double Function(int)>(
-        'pa_sw_volume_to_linear',
-      );
+
   static final _paProplistGets = _lib
       .lookupFunction<
         Pointer<Utf8> Function(Pointer<_PaProplist>, Pointer<Utf8>),

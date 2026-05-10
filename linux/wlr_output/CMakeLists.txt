@@ -49,8 +49,3 @@ set_source_files_properties(wlr_output_manager.cpp PROPERTIES
     COMPILE_FLAGS "-Wno-missing-field-initializers"
 )
 
-# ─── Install alongside Flutter bundle ─────────────────────────────────────────
-install(TARGETS wlr_output
-    LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
-    COMPONENT Runtime
-)

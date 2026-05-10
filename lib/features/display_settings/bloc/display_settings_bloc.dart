@@ -242,27 +242,22 @@ class DisplaySettingsBloc
   Future<void> _loadBrightnessInBackground(
     Emitter<DisplaySettingsState> emit,
   ) async {
+    // السطوع الآن عبر brightnessctl — لا يحتاج اتصال D-Bus
     final powerService = PowerService();
     try {
-      final connected = await powerService.connect();
-      if (connected) {
-        final current = await powerService.getBrightness();
-        final max     = await powerService.getMaxBrightness();
-        await powerService.disconnect();
+      final current = await powerService.getBrightness();
+      final max     = await powerService.getMaxBrightness();
 
-        if (max > 0) {
-          emit(state.copyWith(
-            brightness:         (current / max * 100).clamp(0.0, 100.0),
-            maxBrightness:      max.toDouble(),
-            brightnessSupported: true,
-            brightnessMethod:   'venom_power',
-          ));
-        }
+      if (max > 0) {
+        emit(state.copyWith(
+          brightness:          (current / max * 100).clamp(0.0, 100.0),
+          maxBrightness:       max.toDouble(),
+          brightnessSupported: true,
+          brightnessMethod:    'brightnessctl',
+        ));
       }
     } catch (e) {
       debugPrint('[Bloc] Brightness init error: $e');
-    } finally {
-      await powerService.disconnect();
     }
   }
 
@@ -463,16 +458,13 @@ class DisplaySettingsBloc
   ) async {
     emit(state.copyWith(brightness: event.brightness));
 
-    if (state.brightnessMethod == 'venom_power') {
+    if (state.brightnessMethod == 'brightnessctl') {
       final powerService = PowerService();
       try {
-        final connected = await powerService.connect();
-        if (connected) {
-          final abs = (event.brightness / 100.0 * state.maxBrightness).round();
-          await powerService.setBrightness(abs);
-        }
-      } finally {
-        await powerService.disconnect();
+        final abs = (event.brightness / 100.0 * state.maxBrightness).round();
+        await powerService.setBrightness(abs);
+      } catch (e) {
+        debugPrint('[Bloc] setBrightness error: $e');
       }
     }
   }

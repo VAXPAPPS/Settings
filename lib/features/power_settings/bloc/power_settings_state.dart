@@ -4,12 +4,20 @@ enum PowerSettingsStatus { initial, loading, loaded, error }
 
 class PowerSettingsState extends Equatable {
   final PowerSettingsStatus status;
+
+  // ── بيانات البطارية (من UPower)
   final double batteryLevel;
   final bool isCharging;
+
+  // ── بروفايل الأداء (من power-profiles-daemon)
   final String activePowerProfile;
-  final int dimTimeout;
-  final int blankTimeout;
-  final int suspendTimeout;
+  final bool isProfilesAvailable;
+
+  // ── مهلات الخمول (من aetheridle config)
+  final int dimTimeout;     // بالثواني، 0 = معطّل
+  final int blankTimeout;   // بالثواني، 0 = معطّل
+  final int suspendTimeout; // بالثواني، 0 = معطّل
+
   final String? errorMessage;
 
   const PowerSettingsState({
@@ -17,6 +25,7 @@ class PowerSettingsState extends Equatable {
     this.batteryLevel = 0.0,
     this.isCharging = false,
     this.activePowerProfile = 'balanced',
+    this.isProfilesAvailable = false,
     this.dimTimeout = 0,
     this.blankTimeout = 0,
     this.suspendTimeout = 0,
@@ -28,6 +37,7 @@ class PowerSettingsState extends Equatable {
     double? batteryLevel,
     bool? isCharging,
     String? activePowerProfile,
+    bool? isProfilesAvailable,
     int? dimTimeout,
     int? blankTimeout,
     int? suspendTimeout,
@@ -38,6 +48,7 @@ class PowerSettingsState extends Equatable {
       batteryLevel: batteryLevel ?? this.batteryLevel,
       isCharging: isCharging ?? this.isCharging,
       activePowerProfile: activePowerProfile ?? this.activePowerProfile,
+      isProfilesAvailable: isProfilesAvailable ?? this.isProfilesAvailable,
       dimTimeout: dimTimeout ?? this.dimTimeout,
       blankTimeout: blankTimeout ?? this.blankTimeout,
       suspendTimeout: suspendTimeout ?? this.suspendTimeout,
@@ -51,6 +62,7 @@ class PowerSettingsState extends Equatable {
     batteryLevel,
     isCharging,
     activePowerProfile,
+    isProfilesAvailable,
     dimTimeout,
     blankTimeout,
     suspendTimeout,

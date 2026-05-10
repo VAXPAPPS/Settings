@@ -3,24 +3,32 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'power_settings_event.dart';
 import 'power_settings_state.dart';
 import '../services/power_service.dart';
+import '../services/aetheridle_service.dart';
 
 class PowerSettingsBloc extends Bloc<PowerSettingsEvent, PowerSettingsState> {
   final PowerService _powerService;
-  StreamSubscription? _batterySubscription;
-  StreamSubscription? _timeoutsSubscription;
-  StreamSubscription? _profileSubscription;
+  final AetheridleService _aetheridleService;
 
-  PowerSettingsBloc({PowerService? powerService})
-    : _powerService = powerService ?? PowerService(),
-      super(const PowerSettingsState()) {
+  StreamSubscription<Map<String, dynamic>>? _batterySubscription;
+  StreamSubscription<String>? _profileSubscription;
+
+  PowerSettingsBloc({
+    PowerService? powerService,
+    AetheridleService? aetheridleService,
+  })  : _powerService = powerService ?? PowerService(),
+        _aetheridleService = aetheridleService ?? AetheridleService(),
+        super(const PowerSettingsState()) {
     on<LoadPowerSettings>(_onLoadPowerSettings);
     on<RefreshPowerInfo>(_onRefreshPowerInfo);
     on<SetPowerProfile>(_onSetPowerProfile);
     on<ProfileChangedExternally>(_onProfileChangedExternally);
     on<PerformPowerAction>(_onPerformPowerAction);
     on<SetIdleTimeouts>(_onSetIdleTimeouts);
-    on<RefreshIdleTimeouts>(_onRefreshIdleTimeouts);
   }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // تحميل الإعدادات الأولية
+  // ─────────────────────────────────────────────────────────────────────────
 
   Future<void> _onLoadPowerSettings(
     LoadPowerSettings event,
@@ -28,59 +36,62 @@ class PowerSettingsBloc extends Bloc<PowerSettingsEvent, PowerSettingsState> {
   ) async {
     emit(state.copyWith(status: PowerSettingsStatus.loading));
 
+    // الاتصال بـ PowerService (UPower + PowerProfiles + logind)
     final connected = await _powerService.connect();
     if (!connected) {
-      emit(
-        state.copyWith(
-          status: PowerSettingsStatus.error,
-          errorMessage: 'Failed to connect to Power Daemon',
-        ),
-      );
+      emit(state.copyWith(
+        status: PowerSettingsStatus.error,
+        errorMessage: 'Failed to connect to UPower / logind',
+      ));
       return;
     }
 
+    // الاشتراك في تغييرات البطارية
     _batterySubscription?.cancel();
-    _batterySubscription = _powerService.batteryChangedStream.listen((data) {
+    _batterySubscription =
+        _powerService.batteryChangedStream.listen((data) {
       add(const RefreshPowerInfo());
     });
 
-    _timeoutsSubscription?.cancel();
-    _timeoutsSubscription = _powerService.idleTimeoutsChangedStream.listen((
-      data,
-    ) {
-      add(const RefreshIdleTimeouts());
-    });
-
+    // الاشتراك في تغييرات بروفايل الأداء
     _profileSubscription?.cancel();
-    _profileSubscription = _powerService.profileChangedStream.listen((profile) {
+    _profileSubscription =
+        _powerService.profileChangedStream.listen((profile) {
       add(ProfileChangedExternally(profile));
     });
 
     try {
+      // بيانات البطارية من UPower
       final batteryInfo = await _powerService.getBatteryInfo();
-      final timeouts = await _powerService.getIdleTimeouts();
-      final activeProfile = await _powerService.getActiveProfile();
 
-      emit(
-        state.copyWith(
-          status: PowerSettingsStatus.loaded,
-          batteryLevel: batteryInfo['percentage'] as double,
-          isCharging: batteryInfo['charging'] as bool,
-          activePowerProfile: activeProfile,
-          dimTimeout: timeouts['dim'],
-          blankTimeout: timeouts['blank'],
-          suspendTimeout: timeouts['suspend'],
-        ),
-      );
+      // بروفايل الأداء من power-profiles-daemon
+      final activeProfile = await _powerService.getActiveProfile();
+      final profilesAvailable = _powerService.isProfilesAvailable;
+
+      // مهلات الخمول من ملف config الخاص بـ aetheridle
+      final timeouts = await _aetheridleService.getCurrentTimeoutsSeconds();
+
+      emit(state.copyWith(
+        status: PowerSettingsStatus.loaded,
+        batteryLevel: batteryInfo['percentage'] as double,
+        isCharging: batteryInfo['charging'] as bool,
+        activePowerProfile: activeProfile,
+        isProfilesAvailable: profilesAvailable,
+        dimTimeout: timeouts['dim'] ?? 0,
+        blankTimeout: timeouts['blank'] ?? 0,
+        suspendTimeout: timeouts['suspend'] ?? 0,
+      ));
     } catch (e) {
-      emit(
-        state.copyWith(
-          status: PowerSettingsStatus.error,
-          errorMessage: 'Failed to load power settings: $e',
-        ),
-      );
+      emit(state.copyWith(
+        status: PowerSettingsStatus.error,
+        errorMessage: 'Failed to load power settings: $e',
+      ));
     }
   }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // تحديث البطارية
+  // ─────────────────────────────────────────────────────────────────────────
 
   Future<void> _onRefreshPowerInfo(
     RefreshPowerInfo event,
@@ -88,35 +99,22 @@ class PowerSettingsBloc extends Bloc<PowerSettingsEvent, PowerSettingsState> {
   ) async {
     try {
       final batteryInfo = await _powerService.getBatteryInfo();
-      emit(
-        state.copyWith(
-          batteryLevel: batteryInfo['percentage'] as double,
-          isCharging: batteryInfo['charging'] as bool,
-        ),
-      );
+      emit(state.copyWith(
+        batteryLevel: batteryInfo['percentage'] as double,
+        isCharging: batteryInfo['charging'] as bool,
+      ));
     } catch (_) {}
   }
 
-  Future<void> _onRefreshIdleTimeouts(
-    RefreshIdleTimeouts event,
-    Emitter<PowerSettingsState> emit,
-  ) async {
-    try {
-      final timeouts = await _powerService.getIdleTimeouts();
-      emit(
-        state.copyWith(
-          dimTimeout: timeouts['dim'],
-          blankTimeout: timeouts['blank'],
-          suspendTimeout: timeouts['suspend'],
-        ),
-      );
-    } catch (_) {}
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // بروفايلات الأداء
+  // ─────────────────────────────────────────────────────────────────────────
 
   Future<void> _onSetPowerProfile(
     SetPowerProfile event,
     Emitter<PowerSettingsState> emit,
   ) async {
+    // optimistic update
     emit(state.copyWith(activePowerProfile: event.profile));
     await _powerService.setActiveProfile(event.profile);
   }
@@ -127,6 +125,10 @@ class PowerSettingsBloc extends Bloc<PowerSettingsEvent, PowerSettingsState> {
   ) async {
     emit(state.copyWith(activePowerProfile: event.profile));
   }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // أوامر الطاقة (logind)
+  // ─────────────────────────────────────────────────────────────────────────
 
   Future<void> _onPerformPowerAction(
     PerformPowerAction event,
@@ -151,27 +153,37 @@ class PowerSettingsBloc extends Bloc<PowerSettingsEvent, PowerSettingsState> {
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // مهلات الخمول (aetheridle)
+  // ─────────────────────────────────────────────────────────────────────────
+
   Future<void> _onSetIdleTimeouts(
     SetIdleTimeouts event,
     Emitter<PowerSettingsState> emit,
   ) async {
-    // Optimistic update
-    emit(
-      state.copyWith(
-        dimTimeout: event.dim,
-        blankTimeout: event.blank,
-        suspendTimeout: event.suspend,
-      ),
+    // optimistic update في الـ UI
+    emit(state.copyWith(
+      dimTimeout: event.dim,
+      blankTimeout: event.blank,
+      suspendTimeout: event.suspend,
+    ));
+
+    // كتابة الـ config وإعادة تشغيل aetheridle
+    await _aetheridleService.setAllTimeouts(
+      dimSeconds: event.dim,
+      blankSeconds: event.blank,
+      suspendSeconds: event.suspend,
     );
-    await _powerService.setIdleTimeouts(event.dim, event.blank, event.suspend);
   }
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   @override
   Future<void> close() {
     _batterySubscription?.cancel();
-    _timeoutsSubscription?.cancel();
     _profileSubscription?.cancel();
     _powerService.disconnect();
+    _aetheridleService.dispose();
     return super.close();
   }
 }

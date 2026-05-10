@@ -1,544 +1,537 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'dart:io';
 import 'package:dbus/dbus.dart';
+import 'package:flutter/foundation.dart';
 
-/// خدمة الاتصال بـ Venom Power Daemon عبر D-Bus
+// ─────────────────────────────────────────────────────────────────────────────
+// خدمة الطاقة الرسمية — تتصل بـ:
+//   • UPower          (org.freedesktop.UPower)          ← البطارية
+//   • power-profiles  (net.hadess.PowerProfiles)         ← بروفايلات الأداء
+//   • logind          (org.freedesktop.login1)           ← أوامر الطاقة
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ══════════════════════════════ ثوابت D-Bus ═══════════════════════════════════
+
+// UPower
+const String _kUpowerService = 'org.freedesktop.UPower';
+const String _kUpowerRootPath = '/org/freedesktop/UPower';
+const String _kUpowerInterface = 'org.freedesktop.UPower';
+const String _kUpowerDisplayPath =
+    '/org/freedesktop/UPower/devices/DisplayDevice';
+const String _kUpowerDeviceInterface = 'org.freedesktop.UPower.Device';
+
+// power-profiles-daemon
+const String _kPpService = 'net.hadess.PowerProfiles';
+const String _kPpPath = '/net/hadess/PowerProfiles';
+const String _kPpInterface = 'net.hadess.PowerProfiles';
+
+// logind
+const String _kLogindService = 'org.freedesktop.login1';
+const String _kLogindPath = '/org/freedesktop/login1';
+const String _kLogindManagerIface = 'org.freedesktop.login1.Manager';
+const String _kLogindSessionIface = 'org.freedesktop.login1.Session';
+
+// D-Bus Properties
+const String _kPropertiesIface = 'org.freedesktop.DBus.Properties';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// حالة UPower — قيم خاصية State
+enum _UPowerState {
+  unknown(0),
+  charging(1),
+  discharging(2),
+  empty(3),
+  fullyCharged(4),
+  pendingCharge(5),
+  pendingDischarge(6);
+
+  final int value;
+  const _UPowerState(this.value);
+
+  static _UPowerState fromInt(int v) => _UPowerState.values.firstWhere(
+        (e) => e.value == v,
+        orElse: () => _UPowerState.unknown,
+      );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+
 class PowerService {
-  static const String serviceName = 'org.venom.Power';
-  static const String objectPath = '/org/venom/Power';
-  static const String interfaceName = 'org.venom.Power';
-
-  late DBusClient _client;
-  late DBusRemoteObject _object;
+  late DBusClient _bus;
   bool _isConnected = false;
 
-  bool get isConnected => _isConnected;
+  // كائنات D-Bus الرئيسية
+  late DBusRemoteObject _displayDevice; // UPower DisplayDevice
+  DBusRemoteObject? _ppObj;             // power-profiles-daemon (اختياري)
+  late DBusRemoteObject _logindMgr;     // logind Manager
+  DBusRemoteObject? _logindSession;     // logind Session الحالية
 
-  /// الاتصال بالعفريت
+  bool get isConnected => _isConnected;
+  bool get isProfilesAvailable => _ppObj != null;
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // الاتصال
+  // ─────────────────────────────────────────────────────────────────────────
+
   Future<bool> connect() async {
     try {
-      _client = DBusClient.session();
-      _object = DBusRemoteObject(
-        _client,
-        name: serviceName,
-        path: DBusObjectPath(objectPath),
+      _bus = DBusClient.system();
+
+      // UPower — DisplayDevice
+      _displayDevice = DBusRemoteObject(
+        _bus,
+        name: _kUpowerService,
+        path: DBusObjectPath(_kUpowerDisplayPath),
       );
+
+      // power-profiles-daemon (اختياري)
+      await _tryConnectPowerProfiles();
+
+      // logind — Manager
+      _logindMgr = DBusRemoteObject(
+        _bus,
+        name: _kLogindService,
+        path: DBusObjectPath(_kLogindPath),
+      );
+
+      // logind — Session الحالية
+      await _resolveLogindSession();
+
       _isConnected = true;
       return true;
     } catch (e) {
-      debugPrint('Error connecting to Power daemon: $e');
+      debugPrint('[PowerService] connect error: $e');
       _isConnected = false;
       return false;
     }
   }
 
-  /// قطع الاتصال
+  /// محاولة الاتصال بـ power-profiles-daemon — تتجاهل الخطأ إن لم يكن موجوداً.
+  Future<void> _tryConnectPowerProfiles() async {
+    try {
+      final obj = DBusRemoteObject(
+        _bus,
+        name: _kPpService,
+        path: DBusObjectPath(_kPpPath),
+      );
+      // نتحقق بقراءة الخاصية لمعرفة إن كان الـ daemon متاحاً
+      await obj.callMethod(
+        _kPropertiesIface,
+        'Get',
+        [DBusString(_kPpInterface), DBusString('ActiveProfile')],
+        replySignature: DBusSignature('v'),
+      );
+      _ppObj = obj;
+      debugPrint('[PowerService] power-profiles-daemon متاح');
+    } catch (e) {
+      _ppObj = null;
+      debugPrint('[PowerService] power-profiles-daemon غير متاح: $e');
+    }
+  }
+
+  /// الحصول على مسار الجلسة الحالية من logind.
+  Future<void> _resolveLogindSession() async {
+    try {
+      String? sessionPath;
+
+      // أولاً: استخدام XDG_SESSION_ID
+      final sessionId = Platform.environment['XDG_SESSION_ID'];
+      if (sessionId != null && sessionId.isNotEmpty) {
+        try {
+          final result = await _logindMgr.callMethod(
+            _kLogindManagerIface,
+            'GetSession',
+            [DBusString(sessionId)],
+            replySignature: DBusSignature('o'),
+          );
+          sessionPath = (result.values.first as DBusObjectPath).value;
+        } catch (_) {}
+      }
+
+      // fallback: GetSessionByPID
+      if (sessionPath == null) {
+        try {
+          final result = await _logindMgr.callMethod(
+            _kLogindManagerIface,
+            'GetSessionByPID',
+            [DBusUint32(pid)],
+            replySignature: DBusSignature('o'),
+          );
+          sessionPath = (result.values.first as DBusObjectPath).value;
+        } catch (e) {
+          debugPrint('[PowerService] GetSessionByPID error: $e');
+        }
+      }
+
+      if (sessionPath != null) {
+        _logindSession = DBusRemoteObject(
+          _bus,
+          name: _kLogindService,
+          path: DBusObjectPath(sessionPath),
+        );
+        debugPrint('[PowerService] logind session: $sessionPath');
+      }
+    } catch (e) {
+      debugPrint('[PowerService] _resolveLogindSession error: $e');
+    }
+  }
+
   Future<void> disconnect() async {
     if (_isConnected) {
-      await _client.close();
+      await _bus.close();
       _isConnected = false;
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ⚡ أوامر الطاقة
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<bool> shutdown() async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'Shutdown', []);
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('Shutdown error: $e');
-      return false;
-    }
-  }
-
-  Future<bool> reboot() async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'Reboot', []);
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('Reboot error: $e');
-      return false;
-    }
-  }
-
-  Future<bool> suspend() async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'Suspend', []);
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('Suspend error: $e');
-      return false;
-    }
-  }
-
-  Future<bool> hibernate() async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'Hibernate', []);
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('Hibernate error: $e');
-      return false;
-    }
-  }
-
-  Future<bool> logout() async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'Logout', []);
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('Logout error: $e');
-      return false;
-    }
-  }
-
-  Future<bool> lockScreen() async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'LockScreen', []);
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('LockScreen error: $e');
-      return false;
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 💡 سطوع الشاشة
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<int> getBrightness() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetBrightness',
-        [],
-      );
-      return result.values.first.asInt32();
-    } catch (e) {
-      debugPrint('GetBrightness error: $e');
-      return -1;
-    }
-  }
-
-  Future<bool> setBrightness(int level) async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'SetBrightness', [
-        DBusInt32(level),
-      ]);
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('SetBrightness error: $e');
-      return false;
-    }
-  }
-
-  Future<int> getMaxBrightness() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetMaxBrightness',
-        [],
-      );
-      return result.values.first.asInt32();
-    } catch (e) {
-      debugPrint('GetMaxBrightness error: $e');
-      return -1;
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ⌨️ إضاءة الكيبورد
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<bool> isKeyboardBacklightSupported() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'IsKeyboardBacklightSupported',
-        [],
-      );
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('IsKeyboardBacklightSupported error: $e');
-      return false;
-    }
-  }
-
-  Future<int> getKeyboardBrightness() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetKeyboardBrightness',
-        [],
-      );
-      return result.values.first.asInt32();
-    } catch (e) {
-      debugPrint('GetKeyboardBrightness error: $e');
-      return -1;
-    }
-  }
-
-  Future<bool> setKeyboardBrightness(int level) async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'SetKeyboardBrightness',
-        [DBusInt32(level)],
-      );
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('SetKeyboardBrightness error: $e');
-      return false;
-    }
-  }
-
-  Future<int> getKeyboardMaxBrightness() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetKeyboardMaxBrightness',
-        [],
-      );
-      return result.values.first.asInt32();
-    } catch (e) {
-      debugPrint('GetKeyboardMaxBrightness error: $e');
-      return -1;
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🔋 البطارية
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────────────
+  // 🔋 البطارية — UPower DisplayDevice
+  // ─────────────────────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> getBatteryInfo() async {
     try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetBatteryInfo',
-        [],
+      final result = await _displayDevice.callMethod(
+        _kPropertiesIface,
+        'GetAll',
+        [DBusString(_kUpowerDeviceInterface)],
+        replySignature: DBusSignature('a{sv}'),
       );
+
+      final props = _parseProperties(result.values.first);
+      final percentage = (props['Percentage'] as DBusDouble?)?.value ?? 0.0;
+      final stateInt = (props['State'] as DBusUint32?)?.value.toInt() ?? 0;
+      final state = _UPowerState.fromInt(stateInt);
+      final isCharging = state == _UPowerState.charging ||
+          state == _UPowerState.fullyCharged ||
+          state == _UPowerState.pendingCharge;
+      final timeToEmpty = (props['TimeToEmpty'] as DBusInt64?)?.value ?? 0;
+      final timeToFull = (props['TimeToFull'] as DBusInt64?)?.value ?? 0;
+
       return {
-        'percentage': result.values[0].asDouble(),
-        'charging': result.values[1].asBoolean(),
-        'timeToEmpty': result.values[2].asInt64(),
+        'percentage': percentage,
+        'charging': isCharging,
+        'timeToEmpty': timeToEmpty,
+        'timeToFull': timeToFull,
+        'state': stateInt,
       };
     } catch (e) {
-      debugPrint('GetBatteryInfo error: $e');
-      return {'percentage': 0.0, 'charging': false, 'timeToEmpty': 0};
+      debugPrint('[PowerService] getBatteryInfo error: $e');
+      return {
+        'percentage': 0.0,
+        'charging': false,
+        'timeToEmpty': 0,
+        'timeToFull': 0,
+        'state': 0,
+      };
     }
   }
 
   Future<bool> isOnBattery() async {
     try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetPowerSource',
-        [],
+      final result = await _displayDevice.callMethod(
+        _kPropertiesIface,
+        'Get',
+        [DBusString(_kUpowerDeviceInterface), DBusString('State')],
+        replySignature: DBusSignature('v'),
       );
-      return result.values.first.asBoolean();
+      final stateInt =
+          ((result.values.first as DBusVariant).value as DBusUint32)
+              .value
+              .toInt();
+      return _UPowerState.fromInt(stateInt) == _UPowerState.discharging;
     } catch (e) {
-      debugPrint('GetPowerSource error: $e');
+      debugPrint('[PowerService] isOnBattery error: $e');
       return false;
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 💻 حالة الأجهزة
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<bool> getLidState() async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'GetLidState', []);
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('GetLidState error: $e');
-      return false;
-    }
-  }
-
-  Future<Map<String, bool>> getIdleState() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetIdleState',
-        [],
-      );
-      return {
-        'isIdle': result.values[0].asBoolean(),
-        'screenDimmed': result.values[1].asBoolean(),
-        'screenBlanked': result.values[2].asBoolean(),
-      };
-    } catch (e) {
-      debugPrint('GetIdleState error: $e');
-      return {'isIdle': false, 'screenDimmed': false, 'screenBlanked': false};
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ⏰ إعدادات الخمول
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<Map<String, int>> getIdleTimeouts() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetIdleTimeouts',
-        [],
-      );
-      return {
-        'dim': result.values[0].asUint32(),
-        'blank': result.values[1].asUint32(),
-        'suspend': result.values[2].asUint32(),
-      };
-    } catch (e) {
-      debugPrint('GetIdleTimeouts error: $e');
-      return {'dim': 0, 'blank': 0, 'suspend': 0};
-    }
-  }
-
-  Future<void> setIdleTimeouts(int dim, int blank, int suspend) async {
-    try {
-      await _object.callMethod(interfaceName, 'SetIdleTimeouts', [
-        DBusUint32(dim),
-        DBusUint32(blank),
-        DBusUint32(suspend),
-      ]);
-    } catch (e) {
-      debugPrint('SetIdleTimeouts error: $e');
-    }
-  }
-
-  Future<void> simulateActivity() async {
-    try {
-      await _object.callMethod(interfaceName, 'SimulateActivity', []);
-    } catch (e) {
-      debugPrint('SimulateActivity error: $e');
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🚫 نظام المنع
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<int> inhibit(String what, String who, String why) async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'Inhibit', [
-        DBusString(what),
-        DBusString(who),
-        DBusString(why),
-      ]);
-      return result.values.first.asUint32();
-    } catch (e) {
-      debugPrint('Inhibit error: $e');
-      return 0;
-    }
-  }
-
-  Future<void> unInhibit(int cookie) async {
-    try {
-      await _object.callMethod(interfaceName, 'UnInhibit', [
-        DBusUint32(cookie),
-      ]);
-    } catch (e) {
-      debugPrint('UnInhibit error: $e');
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ⚙️ الإعدادات
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<bool> saveConfig() async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'SaveConfig', []);
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('SaveConfig error: $e');
-      return false;
-    }
-  }
-
-  Future<bool> reloadConfig() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'ReloadConfig',
-        [],
-      );
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('ReloadConfig error: $e');
-      return false;
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ℹ️ معلومات العفريت
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<String> getVersion() async {
-    try {
-      final result = await _object.callMethod(interfaceName, 'GetVersion', []);
-      return result.values.first.asString();
-    } catch (e) {
-      debugPrint('GetVersion error: $e');
-      return 'Unknown';
-    }
-  }
-
-  Future<List<String>> getCapabilities() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetCapabilities',
-        [],
-      );
-      final array = result.values.first as DBusArray;
-      return array.children.map((v) => v.asString()).toList();
-    } catch (e) {
-      debugPrint('GetCapabilities error: $e');
-      return [];
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 📢 الاشتراك في الإشارات
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Stream<DBusSignal> _subscribeToSignal(String signalName) {
-    return DBusSignalStream(
-      _client,
-      sender: serviceName,
-      interface: interfaceName,
-      name: signalName,
-      path: DBusObjectPath(objectPath),
-    );
-  }
-
-  Stream<Map<String, dynamic>> get batteryChangedStream {
-    return _subscribeToSignal('BatteryChanged').map((signal) {
-      return {
-        'percentage': signal.values[0].asDouble(),
-        'charging': signal.values[1].asBoolean(),
-      };
-    });
-  }
-
-  Stream<Map<String, int>> get idleTimeoutsChangedStream {
-    return _subscribeToSignal('IdleTimeoutsChanged').map((signal) {
-      return {
-        'dim': signal.values[0].asUint32(),
-        'blank': signal.values[1].asUint32(),
-        'suspend': signal.values[2].asUint32(),
-      };
-    });
-  }
-
-  Stream<double> get batteryWarningStream {
-    return _subscribeToSignal(
-      'BatteryWarning',
-    ).map((signal) => signal.values.first.asDouble());
-  }
-
-  Stream<bool> get lidStateStream {
-    return _subscribeToSignal(
-      'LidStateChanged',
-    ).map((signal) => signal.values.first.asBoolean());
-  }
-
-  Stream<bool> get powerSourceStream {
-    return _subscribeToSignal(
-      'PowerSourceChanged',
-    ).map((signal) => signal.values.first.asBoolean());
-  }
-
-  Stream<int> get brightnessStream {
-    return _subscribeToSignal(
-      'BrightnessChanged',
-    ).map((signal) => signal.values.first.asInt32());
-  }
-
-  Stream<bool> get screenDimmedStream {
-    return _subscribeToSignal(
-      'ScreenDimmed',
-    ).map((signal) => signal.values.first.asBoolean());
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ⚡ بروفايلات الطاقة
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<bool> isProfilesAvailable() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'IsProfilesAvailable',
-        [],
-      );
-      return result.values.first.asBoolean();
-    } catch (e) {
-      debugPrint('IsProfilesAvailable error: $e');
-      return false;
-    }
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // ⚡ بروفايلات الأداء — power-profiles-daemon
+  // ─────────────────────────────────────────────────────────────────────────
 
   Future<String> getActiveProfile() async {
+    if (_ppObj == null) return 'balanced';
     try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetActiveProfile',
-        [],
+      final result = await _ppObj!.callMethod(
+        _kPropertiesIface,
+        'Get',
+        [DBusString(_kPpInterface), DBusString('ActiveProfile')],
+        replySignature: DBusSignature('v'),
       );
-      return result.values.first.asString();
+      return ((result.values.first as DBusVariant).value as DBusString).value;
     } catch (e) {
-      debugPrint('GetActiveProfile error: $e');
-      return 'unknown';
+      debugPrint('[PowerService] getActiveProfile error: $e');
+      return 'balanced';
     }
   }
 
   Future<bool> setActiveProfile(String profile) async {
+    if (_ppObj == null) return false;
     try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'SetActiveProfile',
-        [DBusString(profile)],
+      await _ppObj!.callMethod(
+        _kPropertiesIface,
+        'Set',
+        [
+          DBusString(_kPpInterface),
+          DBusString('ActiveProfile'),
+          DBusVariant(DBusString(profile)),
+        ],
+        replySignature: DBusSignature(''),
       );
-      return result.values.first.asBoolean();
+      return true;
     } catch (e) {
-      debugPrint('SetActiveProfile error: $e');
+      debugPrint('[PowerService] setActiveProfile error: $e');
       return false;
     }
   }
 
   Future<List<String>> getProfiles() async {
+    if (_ppObj == null) return ['power-saver', 'balanced', 'performance'];
     try {
-      final result = await _object.callMethod(interfaceName, 'GetProfiles', []);
-      final array = result.values.first as DBusArray;
-      return array.children.map((v) => v.asString()).toList();
-    } catch (e) {
-      debugPrint('GetProfiles error: $e');
-      return [];
-    }
-  }
-
-  Future<String> getPerformanceInhibited() async {
-    try {
-      final result = await _object.callMethod(
-        interfaceName,
-        'GetPerformanceInhibited',
-        [],
+      final result = await _ppObj!.callMethod(
+        _kPropertiesIface,
+        'Get',
+        [DBusString(_kPpInterface), DBusString('Profiles')],
+        replySignature: DBusSignature('v'),
       );
-      return result.values.first.asString();
+      final array =
+          (result.values.first as DBusVariant).value as DBusArray;
+      return array.children
+          .map((v) =>
+              ((v as DBusStruct).children.first as DBusString).value)
+          .toList();
     } catch (e) {
-      debugPrint('GetPerformanceInhibited error: $e');
-      return '';
+      debugPrint('[PowerService] getProfiles error: $e');
+      return ['power-saver', 'balanced', 'performance'];
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // ⚡ أوامر الطاقة — logind
+  // ─────────────────────────────────────────────────────────────────────────
+
+  Future<bool> shutdown() => _callLogindPower('PowerOff');
+  Future<bool> reboot() => _callLogindPower('Reboot');
+  Future<bool> suspend() => _callLogindPower('Suspend');
+  Future<bool> hibernate() => _callLogindPower('Hibernate');
+
+  Future<bool> _callLogindPower(String method) async {
+    try {
+      await _logindMgr.callMethod(
+        _kLogindManagerIface,
+        method,
+        [DBusBoolean(false)], // interactive = false
+        replySignature: DBusSignature(''),
+      );
+      return true;
+    } catch (e) {
+      debugPrint('[PowerService] $method error: $e');
+      return false;
+    }
+  }
+
+  /// قفل الشاشة عبر logind Session.Lock()
+  Future<bool> lockScreen() async {
+    if (_logindSession == null) return false;
+    try {
+      await _logindSession!.callMethod(
+        _kLogindSessionIface,
+        'Lock',
+        [],
+        replySignature: DBusSignature(''),
+      );
+      return true;
+    } catch (e) {
+      debugPrint('[PowerService] lockScreen error: $e');
+      return false;
+    }
+  }
+
+  /// تسجيل الخروج — logind Session.Terminate() مع fallback للمجمّع
+  Future<bool> logout() async {
+    // أولاً: logind
+    if (_logindSession != null) {
+      try {
+        await _logindSession!.callMethod(
+          _kLogindSessionIface,
+          'Terminate',
+          [],
+          replySignature: DBusSignature(''),
+        );
+        return true;
+      } catch (e) {
+        debugPrint('[PowerService] logout via logind failed: $e');
+      }
+    }
+
+    // fallback: Hyprland
+    final hyprSig =
+        Platform.environment['HYPRLAND_INSTANCE_SIGNATURE'];
+    if (hyprSig != null && hyprSig.isNotEmpty) {
+      try {
+        final r = await Process.run('hyprctl', ['dispatch', 'exit', '']);
+        if (r.exitCode == 0) return true;
+      } catch (_) {}
+    }
+
+    // fallback: Sway
+    final swaySock = Platform.environment['SWAYSOCK'];
+    if (swaySock != null && swaySock.isNotEmpty) {
+      try {
+        final r = await Process.run('swaymsg', ['exit']);
+        if (r.exitCode == 0) return true;
+      } catch (_) {}
+    }
+
+    return false;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 📡 الاشتراك في الإشارات
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// يراقب تغييرات البطارية عبر PropertiesChanged و DeviceChanged.
+  Stream<Map<String, dynamic>> get batteryChangedStream {
+    final ctrl =
+        StreamController<Map<String, dynamic>>.broadcast();
+
+    // PropertiesChanged على DisplayDevice
+    DBusSignalStream(
+      _bus,
+      sender: _kUpowerService,
+      interface: _kPropertiesIface,
+      name: 'PropertiesChanged',
+      path: DBusObjectPath(_kUpowerDisplayPath),
+    ).listen((signal) async {
+      if (signal.values.isNotEmpty) {
+        final iface = (signal.values[0] as DBusString).value;
+        if (iface == _kUpowerDeviceInterface) {
+          ctrl.add(await getBatteryInfo());
+        }
+      }
+    });
+
+    // DeviceChanged على UPower root
+    DBusSignalStream(
+      _bus,
+      sender: _kUpowerService,
+      interface: _kUpowerInterface,
+      name: 'DeviceChanged',
+      path: DBusObjectPath(_kUpowerRootPath),
+    ).listen((_) async {
+      ctrl.add(await getBatteryInfo());
+    });
+
+    return ctrl.stream;
+  }
+
+  /// يراقب تغييرات بروفايل الأداء.
   Stream<String> get profileChangedStream {
-    return _subscribeToSignal(
-      'ProfileChanged',
-    ).map((signal) => signal.values.first.asString());
+    if (_ppObj == null) return const Stream.empty();
+
+    return DBusSignalStream(
+      _bus,
+      sender: _kPpService,
+      interface: _kPropertiesIface,
+      name: 'PropertiesChanged',
+      path: DBusObjectPath(_kPpPath),
+    ).where((signal) {
+      if (signal.values.length < 2) return false;
+      final iface = (signal.values[0] as DBusString).value;
+      if (iface != _kPpInterface) return false;
+      final changed = signal.values[1] as DBusDict;
+      return changed.children.keys.any(
+        (k) => (k as DBusString).value == 'ActiveProfile',
+      );
+    }).asyncMap((_) => getActiveProfile());
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 💡 سطوع الشاشة — عبر brightnessctl (أو /sys/class/backlight كـ fallback)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// يُعيد السطوع الحالي (قيمة مطلقة) أو -1 عند الخطأ.
+  Future<int> getBrightness() async {
+    try {
+      final result =
+          await Process.run('brightnessctl', ['get'], runInShell: false);
+      if (result.exitCode == 0) {
+        return int.tryParse((result.stdout as String).trim()) ?? -1;
+      }
+    } catch (_) {}
+    // fallback: قراءة من /sys/class/backlight
+    return _readSysBacklight('brightness');
+  }
+
+  /// يُعيد الحد الأقصى للسطوع أو -1 عند الخطأ.
+  Future<int> getMaxBrightness() async {
+    try {
+      final result =
+          await Process.run('brightnessctl', ['max'], runInShell: false);
+      if (result.exitCode == 0) {
+        return int.tryParse((result.stdout as String).trim()) ?? -1;
+      }
+    } catch (_) {}
+    return _readSysBacklight('max_brightness');
+  }
+
+  /// يضبط السطوع إلى قيمة مطلقة.
+  Future<bool> setBrightness(int level) async {
+    try {
+      final result = await Process.run(
+        'brightnessctl',
+        ['set', '$level'],
+        runInShell: false,
+      );
+      return result.exitCode == 0;
+    } catch (_) {}
+    // fallback: الكتابة إلى /sys/class/backlight
+    return _writeSysBacklight(level);
+  }
+
+  /// يقرأ ملف من أول جهاز backlight موجود في /sys/class/backlight.
+  Future<int> _readSysBacklight(String file) async {
+    try {
+      final dir = Directory('/sys/class/backlight');
+      if (!await dir.exists()) return -1;
+      final entries = await dir.list().toList();
+      if (entries.isEmpty) return -1;
+      final path = '${entries.first.path}/$file';
+      final content = await File(path).readAsString();
+      return int.tryParse(content.trim()) ?? -1;
+    } catch (_) {
+      return -1;
+    }
+  }
+
+  /// يكتب قيمة السطوع مباشرة إلى /sys/class/backlight (يتطلب صلاحيات).
+  Future<bool> _writeSysBacklight(int level) async {
+    try {
+      final dir = Directory('/sys/class/backlight');
+      if (!await dir.exists()) return false;
+      final entries = await dir.list().toList();
+      if (entries.isEmpty) return false;
+      final path = '${entries.first.path}/brightness';
+      await File(path).writeAsString('$level');
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 🛠️ مساعدات
+  // ─────────────────────────────────────────────────────────────────────────
+
+  Map<String, DBusValue> _parseProperties(DBusValue value) {
+    final dict = value as DBusDict;
+    return Map.fromEntries(
+      dict.children.entries.map(
+        (e) => MapEntry(
+          (e.key as DBusString).value,
+          (e.value as DBusVariant).value,
+        ),
+      ),
+    );
   }
 }

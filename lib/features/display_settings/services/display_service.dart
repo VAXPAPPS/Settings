@@ -334,34 +334,29 @@ class DisplayService {
 
   
   Future<Map<String, dynamic>> initBrightness() async {
+    // السطوع عبر brightnessctl — لا يحتاج D-Bus
     final powerService = PowerService();
     try {
-      final connected = await powerService.connect();
-      if (connected) {
-        final current = await powerService.getBrightness();
-        final max = await powerService.getMaxBrightness();
-        await powerService.disconnect();
+      final current = await powerService.getBrightness();
+      final max     = await powerService.getMaxBrightness();
 
-        if (max > 0) {
-          return {
-            'brightness': (current / max * 100).clamp(0.0, 100.0),
-            'maxBrightness': max.toDouble(),
-            'brightnessSupported': true,
-            'brightnessMethod': 'venom_power',
-          };
-        }
+      if (max > 0) {
+        return {
+          'brightness':         (current / max * 100).clamp(0.0, 100.0),
+          'maxBrightness':      max.toDouble(),
+          'brightnessSupported': true,
+          'brightnessMethod':   'brightnessctl',
+        };
       }
     } catch (e) {
-      debugPrint('Venom Power brightness failed: $e');
-    } finally {
-      await powerService.disconnect();
+      debugPrint('brightnessctl failed: $e');
     }
 
     return {
-      'brightness': 100.0,
-      'maxBrightness': 100.0,
+      'brightness':         100.0,
+      'maxBrightness':      100.0,
       'brightnessSupported': false,
-      'brightnessMethod': 'none',
+      'brightnessMethod':   'none',
     };
   }
 
@@ -371,19 +366,13 @@ class DisplayService {
     String method,
     double maxBrightness,
   ) async {
-    if (method == 'venom_power') {
+    if (method == 'brightnessctl') {
       final powerService = PowerService();
       try {
-        final connected = await powerService.connect();
-        if (connected) {
-          final absoluteValue = (value / 100.0 * maxBrightness).round();
-          final result = await powerService.setBrightness(absoluteValue);
-          return result;
-        }
+        final absoluteValue = (value / 100.0 * maxBrightness).round();
+        return await powerService.setBrightness(absoluteValue);
       } catch (e) {
         debugPrint('Set brightness error: $e');
-      } finally {
-        await powerService.disconnect();
       }
     }
     return false;

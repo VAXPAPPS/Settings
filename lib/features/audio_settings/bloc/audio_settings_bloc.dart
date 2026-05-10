@@ -7,6 +7,7 @@ import 'audio_settings_state.dart';
 
 class AudioSettingsBloc extends Bloc<AudioSettingsEvent, AudioSettingsState> {
   AudioService? _audioService;
+  StreamSubscription<void>? _audioSubscription;
 
   // Cache
   List<AudioDevice> _sinksCache = [];
@@ -38,6 +39,10 @@ class AudioSettingsBloc extends Bloc<AudioSettingsEvent, AudioSettingsState> {
     _audioService = AudioService();
     try {
       await _audioService!.connect();
+      _audioSubscription?.cancel();
+      _audioSubscription = _audioService!.onAudioSettingsChanged.listen((_) {
+        add(const RefreshAudioInfo());
+      });
     } catch (e) {
       emit(
         state.copyWith(
@@ -265,6 +270,7 @@ class AudioSettingsBloc extends Bloc<AudioSettingsEvent, AudioSettingsState> {
 
   @override
   Future<void> close() {
+    _audioSubscription?.cancel();
     _audioService?.dispose();
     return super.close();
   }

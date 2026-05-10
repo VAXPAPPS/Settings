@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
@@ -57,6 +58,8 @@ class AudioService {
   bool _overamplification = false;
 
   bool get isConnected => _pulse.isConnected;
+
+  Stream<void> get onAudioSettingsChanged => _pulse.onAudioSettingsChanged;
 
   Future<void> connect() async {
     _pulse.connect();
@@ -650,6 +653,34 @@ class _PulseAudioClient {
         Pointer<Utf8> Function(Pointer<_PaProplist>, Pointer<Utf8>),
         Pointer<Utf8> Function(Pointer<_PaProplist>, Pointer<Utf8>)
       >('pa_proplist_gets');
+  static final _paContextSubscribe = _lib
+      .lookupFunction<
+        Pointer<_PaOperation> Function(
+          Pointer<_PaContext>,
+          Uint32,
+          Pointer<NativeFunction<_PaSuccessCbNative>>,
+          Pointer<Void>,
+        ),
+        Pointer<_PaOperation> Function(
+          Pointer<_PaContext>,
+          int,
+          Pointer<NativeFunction<_PaSuccessCbNative>>,
+          Pointer<Void>,
+        )
+      >('pa_context_subscribe');
+  static final _paContextSetSubscribeCallback = _lib
+      .lookupFunction<
+        Void Function(
+          Pointer<_PaContext>,
+          Pointer<NativeFunction<_PaSubscribeCbNative>>,
+          Pointer<Void>,
+        ),
+        void Function(
+          Pointer<_PaContext>,
+          Pointer<NativeFunction<_PaSubscribeCbNative>>,
+          Pointer<Void>,
+        )
+      >('pa_context_set_subscribe_callback');
 
   static final Pointer<NativeFunction<_PaServerInfoCbNative>>
   _serverInfoCallbackPtr = Pointer.fromFunction<_PaServerInfoCbNative>(
@@ -674,11 +705,40 @@ class _PulseAudioClient {
   static final Pointer<NativeFunction<_PaSuccessCbNative>> _successCallbackPtr =
       Pointer.fromFunction<_PaSuccessCbNative>(_successCallback);
 
+  NativeCallable<_PaSubscribeCbNative>? _subscribeCallable;
+  Timer? _eventPumpTimer;
+  final _audioSettingsChangedController = StreamController<void>.broadcast();
+
+  Stream<void> get onAudioSettingsChanged => _audioSettingsChangedController.stream;
+
   Pointer<_PaMainloop>? _mainloop;
   Pointer<_PaContext>? _context;
   bool _connected = false;
 
   bool get isConnected => _connected;
+
+  void _onSubscribeEvent(
+    Pointer<_PaContext> context,
+    int eventType,
+    int index,
+    Pointer<Void> userdata,
+  ) {
+    _audioSettingsChangedController.add(null);
+  }
+
+  void _startEventPump() {
+    _eventPumpTimer?.cancel();
+    _eventPumpTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (_mainloop != null && _connected) {
+        final retval = calloc<Int32>();
+        try {
+          while (_paMainloopIterate(_mainloop!, 0, retval) > 0) {}
+        } finally {
+          calloc.free(retval);
+        }
+      }
+    });
+  }
 
   void connect() {
     if (_connected) return;
@@ -713,6 +773,21 @@ class _PulseAudioClient {
         final state = _paContextGetState(_context!);
         if (state == _paContextReady) {
           _connected = true;
+
+          _subscribeCallable = NativeCallable<_PaSubscribeCbNative>.listener(_onSubscribeEvent);
+          _paContextSetSubscribeCallback(_context!, _subscribeCallable!.nativeFunction, nullptr);
+
+          final op = _paContextSubscribe(
+            _context!,
+            _paSubscriptionMaskSink | _paSubscriptionMaskSource | _paSubscriptionMaskSinkInput | _paSubscriptionMaskServer,
+            _successCallbackPtr,
+            nullptr,
+          );
+          if (op != nullptr) {
+             _paOperationUnref(op);
+          }
+
+          _startEventPump();
           return;
         }
         if (state == _paContextFailed || state == _paContextTerminated) {
@@ -736,6 +811,12 @@ class _PulseAudioClient {
     if (!_connected && _mainloop == null && _context == null) {
       return;
     }
+
+    _eventPumpTimer?.cancel();
+    _eventPumpTimer = null;
+    
+    _subscribeCallable?.close();
+    _subscribeCallable = null;
 
     _disposeNative();
     _connected = false;
@@ -1062,7 +1143,7 @@ class _PulseAudioClient {
   ) {
     final volume = calloc<_PaCVolume>();
     try {
-      final paVolume = _paSwVolumeFromLinear(percent.clamp(0, 150) / 100.0);
+      final paVolume = (percent.clamp(0, 150) * 65536 / 100.0).round();
       _paCvolumeSet(volume, channels <= 0 ? 1 : channels, paVolume);
       return _runSuccessOperation((userdata) => start(volume, userdata));
     } finally {
@@ -1442,7 +1523,7 @@ int _volumeToPercent(_PaCVolume volume) {
     total += volume.values[i];
   }
   final avg = (total / channels).round();
-  return (_PulseAudioClient._paSwVolumeToLinear(avg) * 100).round();
+  return (avg * 100 / 65536).round();
 }
 
 String? _getProp(Pointer<_PaProplist> proplist, String key) {
@@ -1468,6 +1549,11 @@ const int _paContextReady = 4;
 const int _paContextFailed = 5;
 const int _paContextTerminated = 6;
 const int _paOperationRunning = 0;
+
+const int _paSubscriptionMaskSink = 0x0001;
+const int _paSubscriptionMaskSource = 0x0002;
+const int _paSubscriptionMaskSinkInput = 0x0004;
+const int _paSubscriptionMaskServer = 0x0080;
 
 typedef _PaServerInfoCbNative =
     Void Function(Pointer<_PaContext>, Pointer<_PaServerInfo>, Pointer<Void>);
@@ -1501,6 +1587,8 @@ typedef _PaCardInfoCbNative =
     );
 typedef _PaSuccessCbNative =
     Void Function(Pointer<_PaContext>, Int32, Pointer<Void>);
+typedef _PaSubscribeCbNative =
+    Void Function(Pointer<_PaContext>, Int32, Uint32, Pointer<Void>);
 
 final class _PaMainloop extends Opaque {}
 

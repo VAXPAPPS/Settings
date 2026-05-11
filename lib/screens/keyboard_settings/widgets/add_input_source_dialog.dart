@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:settings/features/keyboard_settings/keyboard_settings.dart';
 
@@ -37,15 +38,27 @@ class _AddInputSourceDialogState extends State<AddInputSourceDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color.fromARGB(255, 18, 22, 32),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Container(
-        width: 500,
-        height: 600,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+          child: Container(
+            width: 500,
+            height: 600,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(50, 0, 0, 0),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                
             Row(
               children: [
                 TextButton(
@@ -161,6 +174,8 @@ class _AddInputSourceDialogState extends State<AddInputSourceDialog> {
               ),
             ),
           ],
+        ),
+          ),
         ),
       ),
     );

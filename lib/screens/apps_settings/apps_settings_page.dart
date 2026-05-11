@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:venom_config/venom_config.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -97,30 +98,66 @@ class _AppsSettingsPageState extends State<AppsSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Pick Background Color'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: _currentColor,
-              onColorChanged: (color) {
-                setState(() {
-                  _currentColor = color;
-                });
-              },
-              enableAlpha: false,
-              displayThumbColor: true,
-              paletteType: PaletteType.hsvWithHue,
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          contentPadding: EdgeInsets.zero,
+          content: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(150, 10, 10, 15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Pick Background Color', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: _currentColor,
+                          onColorChanged: (color) {
+                            setState(() {
+                              _currentColor = color;
+                            });
+                          },
+                          enableAlpha: false,
+                          displayThumbColor: true,
+                          paletteType: PaletteType.hsvWithHue,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                        ),
+                        TextButton(
+                          child: const Text('Got it', style: TextStyle(color: Colors.blueAccent)),
+                          onPressed: () {
+                            _updateConfig(_currentColor.withValues(alpha: _opacity));
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Got it'),
-              onPressed: () {
-                _updateConfig(_currentColor.withValues(alpha: _opacity));
-                // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
-              },
-            ),
-          ],
         );
       },
     );
@@ -131,30 +168,66 @@ class _AppsSettingsPageState extends State<AppsSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Pick Text Color'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: _currentTextColor,
-              onColorChanged: (color) {
-                setState(() {
-                  _currentTextColor = color;
-                });
-              },
-              enableAlpha: false,
-              displayThumbColor: true,
-              paletteType: PaletteType.hsvWithHue,
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          contentPadding: EdgeInsets.zero,
+          content: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(100, 0, 0, 0),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Pick Text Color', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: _currentTextColor,
+                          onColorChanged: (color) {
+                            setState(() {
+                              _currentTextColor = color;
+                            });
+                          },
+                          enableAlpha: false,
+                          displayThumbColor: true,
+                          paletteType: PaletteType.hsvWithHue,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                        ),
+                        TextButton(
+                          child: const Text('Got it', style: TextStyle(color: Colors.blueAccent)),
+                          onPressed: () {
+                            _updateTextConfig(_currentTextColor);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Got it'),
-              onPressed: () {
-                _updateTextConfig(_currentTextColor);
-                // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
-              },
-            ),
-          ],
         );
       },
     );

@@ -12,11 +12,11 @@ class DateTimeDialog extends StatefulWidget {
 class _DateTimeDialogState extends State<DateTimeDialog> {
   final _service = SystemService();
 
-  bool _automaticTime     = true;
+  bool _automaticTime = true;
   bool _automaticTimezone = true;
-  String _timezone        = 'UTC';
+  String _timezone = 'UTC';
   List<String> _timezones = [];
-  bool _loading           = true;
+  bool _loading = true;
 
   @override
   void initState() {
@@ -34,10 +34,10 @@ class _DateTimeDialogState extends State<DateTimeDialog> {
 
       if (!mounted) return;
       setState(() {
-        _timezone      = results[0] as String;
-        _timezones     = results[1] as List<String>;
+        _timezone = results[0] as String;
+        _timezones = results[1] as List<String>;
         _automaticTime = results[2] as bool;
-        _loading       = false;
+        _loading = false;
 
         // Ensure current TZ is in the list
         if (_timezone.isNotEmpty && !_timezones.contains(_timezone)) {
@@ -80,7 +80,7 @@ class _DateTimeDialogState extends State<DateTimeDialog> {
             width: 500,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color.fromARGB(150, 10, 10, 15),
+              color: const Color.fromARGB(100, 0, 0, 0),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
@@ -88,51 +88,51 @@ class _DateTimeDialogState extends State<DateTimeDialog> {
               ),
             ),
             child: _loading
-            ? const SizedBox(
-                height: 200,
-                child: Center(child: CircularProgressIndicator()),
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Date & Time',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildToggleSetting(
-                    'Automatic Time',
-                    _automaticTime,
-                    _setAutomaticTime,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildToggleSetting(
-                    'Automatic Timezone',
-                    _automaticTimezone,
-                    (value) => setState(() => _automaticTimezone = value),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildTimezoneDropdown(),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                ? const SizedBox(
+                    height: 200,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Close',
-                          style: TextStyle(color: Colors.white70),
+                      const Text(
+                        'Date & Time',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildToggleSetting(
+                        'Automatic Time',
+                        _automaticTime,
+                        _setAutomaticTime,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildToggleSetting(
+                        'Automatic Timezone',
+                        _automaticTimezone,
+                        (value) => setState(() => _automaticTimezone = value),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTimezoneDropdown(),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text(
+                              'Close',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
           ),
         ),
       ),
@@ -166,8 +166,7 @@ class _DateTimeDialogState extends State<DateTimeDialog> {
 
   Widget _buildTimezoneDropdown() {
     final uniqueTimezones = _timezones.toSet().toList()..sort();
-    final displayValue =
-        uniqueTimezones.contains(_timezone) ? _timezone : null;
+    final displayValue = uniqueTimezones.contains(_timezone) ? _timezone : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

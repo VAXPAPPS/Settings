@@ -13,7 +13,7 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
   final _service = SystemService();
 
   bool _sshEnabled = false;
-  bool _loading    = true;
+  bool _loading = true;
   String? _sshInfo;
 
   @override
@@ -30,8 +30,8 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
       if (!mounted) return;
       setState(() {
         _sshEnabled = enabled;
-        _sshInfo    = info;
-        _loading    = false;
+        _sshInfo = info;
+        _loading = false;
       });
     } catch (e) {
       debugPrint('Load SSH settings error: $e');
@@ -75,7 +75,7 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
             width: 500,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color.fromARGB(150, 10, 10, 15),
+              color: const Color.fromARGB(100, 0, 0, 0),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
@@ -83,62 +83,62 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
               ),
             ),
             child: _loading
-            ? const SizedBox(
-                height: 160,
-                child: Center(child: CircularProgressIndicator()),
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Secure Shell',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildToggleSetting(
-                    'SSH',
-                    _sshEnabled,
-                    'Enable SSH network access to this device',
-                    _setSSH,
-                  ),
-                  if (_sshEnabled && _sshInfo != null) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _sshInfo!,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 12,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                ? const SizedBox(
+                    height: 160,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Close',
-                          style: TextStyle(color: Colors.white70),
+                      const Text(
+                        'Secure Shell',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildToggleSetting(
+                        'SSH',
+                        _sshEnabled,
+                        'Enable SSH network access to this device',
+                        _setSSH,
+                      ),
+                      if (_sshEnabled && _sshInfo != null) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _sshInfo!,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 12,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text(
+                              'Close',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
           ),
         ),
       ),

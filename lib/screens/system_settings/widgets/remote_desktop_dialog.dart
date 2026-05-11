@@ -12,9 +12,9 @@ class RemoteDesktopDialog extends StatefulWidget {
 class _RemoteDesktopDialogState extends State<RemoteDesktopDialog> {
   final _service = SystemService();
 
-  bool _remoteDesktopEnabled  = false;
-  bool _screenSharingEnabled  = false;
-  bool _loading               = true;
+  bool _remoteDesktopEnabled = false;
+  bool _screenSharingEnabled = false;
+  bool _loading = true;
 
   @override
   void initState() {
@@ -66,7 +66,7 @@ class _RemoteDesktopDialogState extends State<RemoteDesktopDialog> {
             width: 500,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color.fromARGB(150, 10, 10, 15),
+              color: const Color.fromARGB(100, 0, 0, 0),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
@@ -74,51 +74,52 @@ class _RemoteDesktopDialogState extends State<RemoteDesktopDialog> {
               ),
             ),
             child: _loading
-            ? const SizedBox(
-                height: 160,
-                child: Center(child: CircularProgressIndicator()),
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Remote Desktop',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildToggleSetting(
-                    'Remote Desktop',
-                    _remoteDesktopEnabled,
-                    'Allow remote connections to this device',
-                    _setRemoteDesktop,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildToggleSetting(
-                    'Screen Sharing',
-                    _screenSharingEnabled,
-                    'Allow others to view your screen',
-                    (value) => setState(() => _screenSharingEnabled = value),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                ? const SizedBox(
+                    height: 160,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Close',
-                          style: TextStyle(color: Colors.white70),
+                      const Text(
+                        'Remote Desktop',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildToggleSetting(
+                        'Remote Desktop',
+                        _remoteDesktopEnabled,
+                        'Allow remote connections to this device',
+                        _setRemoteDesktop,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildToggleSetting(
+                        'Screen Sharing',
+                        _screenSharingEnabled,
+                        'Allow others to view your screen',
+                        (value) =>
+                            setState(() => _screenSharingEnabled = value),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text(
+                              'Close',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
           ),
         ),
       ),

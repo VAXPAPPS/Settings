@@ -14,7 +14,7 @@ class _RegionLanguageDialogState extends State<RegionLanguageDialog> {
 
   String _currentLocale = '';
   String _currentLanguage = 'English (US)';
-  String _currentRegion   = 'United States';
+  String _currentRegion = 'United States';
 
   // Mapping from locale prefix → display name
   static const _languageMap = {
@@ -44,13 +44,24 @@ class _RegionLanguageDialogState extends State<RegionLanguageDialog> {
         if (locale.contains('_')) {
           final country = locale.split('_')[1].split('.').first.toUpperCase();
           switch (country) {
-            case 'US': _currentRegion = 'United States'; break;
-            case 'GB': _currentRegion = 'United Kingdom'; break;
-            case 'CA': _currentRegion = 'Canada'; break;
-            case 'AU': _currentRegion = 'Australia'; break;
+            case 'US':
+              _currentRegion = 'United States';
+              break;
+            case 'GB':
+              _currentRegion = 'United Kingdom';
+              break;
+            case 'CA':
+              _currentRegion = 'Canada';
+              break;
+            case 'AU':
+              _currentRegion = 'Australia';
+              break;
             case 'SA':
-            case 'AE': _currentRegion = 'United States'; break;
-            default:   _currentRegion = 'United States';
+            case 'AE':
+              _currentRegion = 'United States';
+              break;
+            default:
+              _currentRegion = 'United States';
           }
         }
       });
@@ -72,7 +83,7 @@ class _RegionLanguageDialogState extends State<RegionLanguageDialog> {
             width: 500,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color.fromARGB(150, 10, 10, 15),
+              color: const Color.fromARGB(100, 0, 0, 0),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
@@ -80,55 +91,55 @@ class _RegionLanguageDialogState extends State<RegionLanguageDialog> {
               ),
             ),
             child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Region & Language',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 8),
-            if (_currentLocale.isNotEmpty)
-              Text(
-                'Current locale: $_currentLocale',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.5),
-                ),
-              ),
-            const SizedBox(height: 16),
-            _buildDropdownSetting(
-              'Language',
-              _currentLanguage,
-              ['English (US)', 'Arabic', 'French', 'German', 'Spanish'],
-              (value) => setState(() => _currentLanguage = value),
-            ),
-            const SizedBox(height: 16),
-            _buildDropdownSetting(
-              'Region',
-              _currentRegion,
-              ['United States', 'United Kingdom', 'Canada', 'Australia'],
-              (value) => setState(() => _currentRegion = value),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Close',
-                    style: TextStyle(color: Colors.white70),
+                const Text(
+                  'Region & Language',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
+                ),
+                const SizedBox(height: 8),
+                if (_currentLocale.isNotEmpty)
+                  Text(
+                    'Current locale: $_currentLocale',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white.withValues(alpha: 0.5),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                _buildDropdownSetting(
+                  'Language',
+                  _currentLanguage,
+                  ['English (US)', 'Arabic', 'French', 'German', 'Spanish'],
+                  (value) => setState(() => _currentLanguage = value),
+                ),
+                const SizedBox(height: 16),
+                _buildDropdownSetting(
+                  'Region',
+                  _currentRegion,
+                  ['United States', 'United Kingdom', 'Canada', 'Australia'],
+                  (value) => setState(() => _currentRegion = value),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'Close',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
           ),
         ),
       ),

@@ -25,7 +25,7 @@ class _UsersDialogState extends State<UsersDialog> {
       final users = await _service.getUsers();
       if (!mounted) return;
       setState(() {
-        _users   = users;
+        _users = users;
         _loading = false;
       });
     } catch (e) {
@@ -54,9 +54,9 @@ class _UsersDialogState extends State<UsersDialog> {
     // Build the sudo chpasswd command entirely in Dart; it is executed via
     // the native system() call inside sys_run_shell_command() — no dart:io.
     // We escape the password fields to avoid shell injection.
-    final escapedAdmin  = adminPassword.replaceAll("'", r"'\''");
+    final escapedAdmin = adminPassword.replaceAll("'", r"'\''");
     final escapedPasswd = passwordLine.replaceAll("'", r"'\''");
-    final chpasswdCmd   =
+    final chpasswdCmd =
         "printf '%s\\n' '$escapedAdmin' | sudo -S bash -c "
         "\"printf '%s\\n' '$escapedPasswd' | chpasswd\"";
 
@@ -110,9 +110,9 @@ class _UsersDialogState extends State<UsersDialog> {
     if (password == null || password.isEmpty) return;
 
     try {
-      final escapedAdmin   = adminPassword.replaceAll("'", r"'\''");
-      final escapedUser    = username.replaceAll("'", r"'\''");
-      final createCmd      =
+      final escapedAdmin = adminPassword.replaceAll("'", r"'\''");
+      final escapedUser = username.replaceAll("'", r"'\''");
+      final createCmd =
           "printf '%s\\n' '$escapedAdmin' | sudo -S useradd -m -s /bin/bash '$escapedUser'";
 
       final created = await _runPrivilegedCommand(createCmd);
@@ -128,9 +128,9 @@ class _UsersDialogState extends State<UsersDialog> {
         return;
       }
 
-      final passwordLine    = '$username:$password';
-      final escapedPasswd   = passwordLine.replaceAll("'", r"'\''");
-      final setPassCmd      =
+      final passwordLine = '$username:$password';
+      final escapedPasswd = passwordLine.replaceAll("'", r"'\''");
+      final setPassCmd =
           "printf '%s\\n' '$escapedAdmin' | sudo -S bash -c "
           "\"printf '%s\\n' '$escapedPasswd' | chpasswd\"";
 
@@ -171,7 +171,7 @@ class _UsersDialogState extends State<UsersDialog> {
       builder: (context) {
         String? password;
         String? confirmPassword;
-        bool obscureText        = true;
+        bool obscureText = true;
         bool obscureConfirmText = true;
 
         return AlertDialog(
@@ -185,7 +185,7 @@ class _UsersDialogState extends State<UsersDialog> {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(150, 10, 10, 15),
+                  color: const Color.fromARGB(100, 0, 0, 0),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.1),
@@ -196,7 +196,14 @@ class _UsersDialogState extends State<UsersDialog> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     StatefulBuilder(
                       builder: (context, setState) => Column(
@@ -211,7 +218,9 @@ class _UsersDialogState extends State<UsersDialog> {
                               hintStyle: const TextStyle(color: Colors.white54),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  obscureText ? Icons.visibility_off : Icons.visibility,
+                                  obscureText
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
                                   color: Colors.white54,
                                 ),
                                 onPressed: () =>
@@ -221,7 +230,9 @@ class _UsersDialogState extends State<UsersDialog> {
                                 borderSide: BorderSide(color: Colors.white24),
                               ),
                               focusedBorder: const UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.blueAccent),
+                                borderSide: BorderSide(
+                                  color: Colors.blueAccent,
+                                ),
                               ),
                             ),
                           ),
@@ -233,7 +244,9 @@ class _UsersDialogState extends State<UsersDialog> {
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 hintText: 'Confirm Password',
-                                hintStyle: const TextStyle(color: Colors.white54),
+                                hintStyle: const TextStyle(
+                                  color: Colors.white54,
+                                ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     obscureConfirmText
@@ -242,14 +255,17 @@ class _UsersDialogState extends State<UsersDialog> {
                                     color: Colors.white54,
                                   ),
                                   onPressed: () => setState(
-                                    () => obscureConfirmText = !obscureConfirmText,
+                                    () => obscureConfirmText =
+                                        !obscureConfirmText,
                                   ),
                                 ),
                                 enabledBorder: const UnderlineInputBorder(
                                   borderSide: BorderSide(color: Colors.white24),
                                 ),
                                 focusedBorder: const UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.blueAccent),
+                                  borderSide: BorderSide(
+                                    color: Colors.blueAccent,
+                                  ),
                                 ),
                               ),
                             ),
@@ -263,7 +279,10 @@ class _UsersDialogState extends State<UsersDialog> {
                       children: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(color: Colors.white54),
+                          ),
                         ),
                         TextButton(
                           onPressed: () {
@@ -278,7 +297,10 @@ class _UsersDialogState extends State<UsersDialog> {
                             }
                             Navigator.pop(context, password);
                           },
-                          child: const Text('OK', style: TextStyle(color: Colors.blueAccent)),
+                          child: const Text(
+                            'OK',
+                            style: TextStyle(color: Colors.blueAccent),
+                          ),
                         ),
                       ],
                     ),
@@ -312,7 +334,7 @@ class _UsersDialogState extends State<UsersDialog> {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(150, 10, 10, 15),
+                  color: const Color.fromARGB(100, 0, 0, 0),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.1),
@@ -323,7 +345,14 @@ class _UsersDialogState extends State<UsersDialog> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     TextField(
                       onChanged: (v) => value = v,
@@ -345,11 +374,17 @@ class _UsersDialogState extends State<UsersDialog> {
                       children: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(color: Colors.white54),
+                          ),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, value),
-                          child: const Text('OK', style: TextStyle(color: Colors.blueAccent)),
+                          child: const Text(
+                            'OK',
+                            style: TextStyle(color: Colors.blueAccent),
+                          ),
                         ),
                       ],
                     ),
@@ -379,7 +414,7 @@ class _UsersDialogState extends State<UsersDialog> {
             height: 500,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color.fromARGB(150, 10, 10, 15),
+              color: const Color.fromARGB(100, 0, 0, 0),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
@@ -387,26 +422,27 @@ class _UsersDialogState extends State<UsersDialog> {
               ),
             ),
             child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Users',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _users.isEmpty
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Users',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: _loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _users.isEmpty
                       ? Center(
                           child: Text(
                             'No users found',
                             style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.5)),
+                              color: Colors.white.withValues(alpha: 0.5),
+                            ),
                           ),
                         )
                       : ListView.builder(
@@ -471,35 +507,35 @@ class _UsersDialogState extends State<UsersDialog> {
                             );
                           },
                         ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _createNewUser,
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Create User'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Close',
-                    style: TextStyle(color: Colors.white70),
-                  ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _createNewUser,
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('Create User'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'Close',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
           ),
         ),
       ),

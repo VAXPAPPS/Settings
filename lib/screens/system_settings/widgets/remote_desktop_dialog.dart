@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:settings/features/system_settings/services/system_service.dart';
 
 class RemoteDesktopDialog extends StatefulWidget {
   const RemoteDesktopDialog({super.key});
@@ -9,8 +10,11 @@ class RemoteDesktopDialog extends StatefulWidget {
 }
 
 class _RemoteDesktopDialogState extends State<RemoteDesktopDialog> {
-  bool _remoteDesktopEnabled = false;
-  bool _screenSharingEnabled = false;
+  final _service = SystemService();
+
+  bool _remoteDesktopEnabled  = false;
+  bool _screenSharingEnabled  = false;
+  bool _loading               = true;
 
   @override
   void initState() {
@@ -20,94 +24,102 @@ class _RemoteDesktopDialogState extends State<RemoteDesktopDialog> {
 
   Future<void> _loadRemoteDesktopSettings() async {
     try {
-      
-      final vncResult = await Process.run('systemctl', [
-        'is-active',
-        'vino-server',
-      ]);
-      setState(() => _remoteDesktopEnabled = vncResult.exitCode == 0);
-
-      
-      final sharingResult = await Process.run('gsettings', [
-        'get',
-        'org.gnome.desktop.remote-desktop.rdp',
-        'enable',
-      ]);
-      if (sharingResult.exitCode == 0) {
-        setState(
-          () => _screenSharingEnabled =
-              sharingResult.stdout.toString().trim() == 'true',
-        );
-      }
+      final enabled = await _service.isRemoteDesktopEnabled();
+      if (!mounted) return;
+      setState(() {
+        _remoteDesktopEnabled = enabled;
+        // Screen sharing uses the same backend for now
+        _screenSharingEnabled = enabled;
+        _loading = false;
+      });
     } catch (e) {
       debugPrint('Load remote desktop settings error: $e');
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _setRemoteDesktop(bool enabled) async {
-    try {
-      if (enabled) {
-        await Process.run('systemctl', ['--user', 'enable', 'vino-server']);
-        await Process.run('systemctl', ['--user', 'start', 'vino-server']);
-      } else {
-        await Process.run('systemctl', ['--user', 'stop', 'vino-server']);
-        await Process.run('systemctl', ['--user', 'disable', 'vino-server']);
-      }
-      setState(() => _remoteDesktopEnabled = enabled);
-    } catch (e) {
-      debugPrint('Set remote desktop error: $e');
+    setState(() => _remoteDesktopEnabled = enabled);
+    final ok = await _service.setRemoteDesktopEnabled(enabled);
+    if (!mounted) return;
+    if (!ok) {
+      setState(() => _remoteDesktopEnabled = !enabled);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to change remote desktop state'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color.fromARGB(255, 18, 22, 32),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Container(
-        width: 500,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Remote Desktop',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            width: 500,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(150, 10, 10, 15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+                width: 1,
               ),
             ),
-            const SizedBox(height: 24),
-            _buildToggleSetting(
-              'Remote Desktop',
-              _remoteDesktopEnabled,
-              'Allow remote connections to this device',
-              _setRemoteDesktop,
-            ),
-            const SizedBox(height: 16),
-            _buildToggleSetting(
-              'Screen Sharing',
-              _screenSharingEnabled,
-              'Allow others to view your screen',
-              (value) => setState(() => _screenSharingEnabled = value),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => // ignore: use_build_context_synchronously
-      Navigator.pop(context),
-                  child: const Text(
-                    'Close',
-                    style: TextStyle(color: Colors.white70),
+            child: _loading
+            ? const SizedBox(
+                height: 160,
+                child: Center(child: CircularProgressIndicator()),
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Remote Desktop',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(height: 24),
+                  _buildToggleSetting(
+                    'Remote Desktop',
+                    _remoteDesktopEnabled,
+                    'Allow remote connections to this device',
+                    _setRemoteDesktop,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildToggleSetting(
+                    'Screen Sharing',
+                    _screenSharingEnabled,
+                    'Allow others to view your screen',
+                    (value) => setState(() => _screenSharingEnabled = value),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          'Close',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+          ),
         ),
       ),
     );

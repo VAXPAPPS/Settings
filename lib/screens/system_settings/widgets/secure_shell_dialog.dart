@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:settings/features/system_settings/services/system_service.dart';
 
 class SecureShellDialog extends StatefulWidget {
   const SecureShellDialog({super.key});
@@ -9,7 +10,11 @@ class SecureShellDialog extends StatefulWidget {
 }
 
 class _SecureShellDialogState extends State<SecureShellDialog> {
+  final _service = SystemService();
+
   bool _sshEnabled = false;
+  bool _loading    = true;
+  String? _sshInfo;
 
   @override
   void initState() {
@@ -19,33 +24,40 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
 
   Future<void> _loadSSHSettings() async {
     try {
-      final result = await Process.run('systemctl', ['is-active', 'ssh']);
-      setState(() => _sshEnabled = result.exitCode == 0);
+      final enabled = await _service.isSSHEnabled();
+      String? info;
+      if (enabled) info = await _service.getSSHInfo();
+      if (!mounted) return;
+      setState(() {
+        _sshEnabled = enabled;
+        _sshInfo    = info;
+        _loading    = false;
+      });
     } catch (e) {
-      
-      try {
-        final result2 = await Process.run('systemctl', ['is-active', 'sshd']);
-        setState(() => _sshEnabled = result2.exitCode == 0);
-      } catch (_) {}
+      debugPrint('Load SSH settings error: $e');
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _setSSH(bool enabled) async {
-    try {
-      final serviceName = _sshEnabled ? 'ssh' : 'sshd';
+    setState(() => _sshEnabled = enabled);
+    final ok = await _service.setSSHEnabled(enabled);
+    if (!mounted) return;
+    if (ok) {
+      // Refresh SSH info after enabling
       if (enabled) {
-        await Process.run('sudo', ['systemctl', 'enable', serviceName]);
-        await Process.run('sudo', ['systemctl', 'start', serviceName]);
+        final info = await _service.getSSHInfo();
+        if (mounted) setState(() => _sshInfo = info);
       } else {
-        await Process.run('sudo', ['systemctl', 'stop', serviceName]);
-        await Process.run('sudo', ['systemctl', 'disable', serviceName]);
+        setState(() => _sshInfo = null);
       }
-      setState(() => _sshEnabled = enabled);
-    } catch (e) {
-      debugPrint('Set SSH error: $e');
-      // ignore: use_build_context_synchronously
+    } else {
+      setState(() => _sshEnabled = !enabled);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Requires administrator privileges')),
+        const SnackBar(
+          content: Text('Requires administrator privileges'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -53,86 +65,84 @@ class _SecureShellDialogState extends State<SecureShellDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color.fromARGB(255, 18, 22, 32),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Container(
-        width: 500,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Secure Shell',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            width: 500,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(150, 10, 10, 15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+                width: 1,
               ),
             ),
-            const SizedBox(height: 24),
-            _buildToggleSetting(
-              'SSH',
-              _sshEnabled,
-              'Enable SSH network access to this device',
-              _setSSH,
-            ),
-            const SizedBox(height: 16),
-            if (_sshEnabled) ...[
-              FutureBuilder<String>(
-                future: _getSSHInfo(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Container(
+            child: _loading
+            ? const SizedBox(
+                height: 160,
+                child: Center(child: CircularProgressIndicator()),
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Secure Shell',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildToggleSetting(
+                    'SSH',
+                    _sshEnabled,
+                    'Enable SSH network access to this device',
+                    _setSSH,
+                  ),
+                  if (_sshEnabled && _sshInfo != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        snapshot.data!,
+                        _sshInfo!,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 12,
                           fontFamily: 'monospace',
                         ),
                       ),
-                    );
-                  }
-                  return const SizedBox();
-                },
-              ),
-            ],
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => // ignore: use_build_context_synchronously
-      Navigator.pop(context),
-                  child: const Text(
-                    'Close',
-                    style: TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          'Close',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+          ),
         ),
       ),
     );
-  }
-
-  Future<String> _getSSHInfo() async {
-    try {
-      final hostname = await Process.run('hostname', []);
-      final ipResult = await Process.run('hostname', ['-I']);
-      final hostnameStr = hostname.stdout.toString().trim();
-      final ipStr = ipResult.stdout.toString().trim().split(' ').first;
-      return 'SSH is enabled\nConnect using: ssh $hostnameStr@$ipStr';
-    } catch (e) {
-      return 'SSH is enabled';
-    }
   }
 
   Widget _buildToggleSetting(

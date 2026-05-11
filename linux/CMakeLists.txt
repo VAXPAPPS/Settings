@@ -57,11 +57,14 @@ pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
 # ─── wlr-output-management Wayland backend ───────────────────────────────────
 add_subdirectory("wlr_output")
 
+# ─── System settings FFI bridge ───────────────────────────────────────────────
+add_subdirectory("system_ffi")
+
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
 # Run the Flutter tool portions of the build. This must not be removed.
-add_dependencies(${BINARY_NAME} flutter_assemble wlr_output)
+add_dependencies(${BINARY_NAME} flutter_assemble wlr_output system_ffi)
 
 # Only the install-generated bundle's copy of the executable will launch
 # correctly, since the resources must in the right relative locations. To avoid
@@ -117,6 +120,12 @@ install(DIRECTORY "${NATIVE_ASSETS_DIR}"
 
 # Install wlr_output shared library
 install(TARGETS wlr_output
+   LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+   COMPONENT Runtime
+)
+
+# Install system_ffi shared library
+install(TARGETS system_ffi
    LIBRARY DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
    COMPONENT Runtime
 )

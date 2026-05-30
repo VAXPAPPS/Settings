@@ -70,12 +70,17 @@ class _NetworkSettingsSheetState extends State<NetworkSettingsSheet> {
         _gwCtrl.text,
         _subnetCtrl.text,
         _dns1Ctrl.text,
+        _dns2Ctrl.text,
       );
     }
 
+    // Always apply DNS (works for both DHCP and static)
     if (_dns1Ctrl.text.isNotEmpty || _dns2Ctrl.text.isNotEmpty) {
       await widget.service.setDNS(ssid, _dns1Ctrl.text, _dns2Ctrl.text);
     }
+
+    // Push changes to the active connection immediately
+    await widget.service.reapplyActiveConnection();
 
     setState(() => _saving = false);
     widget.onSaved();

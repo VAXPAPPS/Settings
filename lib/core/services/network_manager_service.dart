@@ -645,38 +645,111 @@ class NetworkManagerService {
   // 📶 WiFi – Static IP / DHCP / DNS / AutoConnect
   // ────────────────────────────────────────────────────────────────────────
 
+  // ── Read full a{sa{sv}} from a saved connection ────────────────────────
+  Future<Map<String, Map<String, DBusValue>>?> _getFullSettings(
+    String connPath,
+  ) async {
+    try {
+      final result = await _obj(connPath).callMethod(
+        _nmSettingsConnIface,
+        'GetSettings',
+        [],
+        replySignature: DBusSignature('a{sa{sv}}'),
+      );
+      final top = result.values.first as DBusDict;
+      final out = <String, Map<String, DBusValue>>{};
+      for (final e in top.children.entries) {
+        final section = e.value as DBusDict;
+        out[(e.key as DBusString).value] = {
+          for (final s in section.children.entries)
+            (s.key as DBusString).value: (s.value as DBusVariant).value,
+        };
+      }
+      return out;
+    } catch (e) {
+      debugPrint('[NM] _getFullSettings error: $e');
+      return null;
+    }
+  }
+
+  // ── Rebuild a{sa{sv}} DBusDict from parsed map ──────────────────────────
+  DBusDict _buildSettingsDict(
+    Map<String, Map<String, DBusValue>> settings,
+  ) {
+    return DBusDict(
+      DBusSignature('s'),
+      DBusSignature('a{sv}'),
+      {
+        for (final sec in settings.entries)
+          DBusString(sec.key): DBusDict(
+            DBusSignature('s'),
+            DBusSignature('v'),
+            {
+              for (final kv in sec.value.entries)
+                DBusString(kv.key): DBusVariant(kv.value),
+            },
+          ),
+      },
+    );
+  }
+
+  // ── Reapply active connection so changes take effect immediately ─────────
+  Future<void> reapplyActiveConnection() async {
+    try {
+      final devicePath = await _getWifiDevicePath();
+      if (devicePath == null) return;
+      await _obj(devicePath.value).callMethod(
+        'org.freedesktop.NetworkManager.Device',
+        'Reapply',
+        [
+          DBusDict(DBusSignature('s'), DBusSignature('a{sv}'), {}),
+          DBusUint64(0),
+          DBusUint32(0),
+        ],
+      );
+    } catch (e) {
+      debugPrint('[NM] reapply error (non-fatal): $e');
+    }
+  }
+
   Future<bool> setStaticIP(
     String ssid,
     String ip,
     String gateway,
     String subnet,
-    String dns,
-  ) async {
+    String dns1, [
+    String dns2 = '',
+  ]) async {
     try {
       final connPath = await _findSavedConnectionForSsid(ssid);
       if (connPath == null) return false;
 
-      final prefix = _subnetToPrefix(subnet);
-      // ignore: unused_local_variable
-      final updatedSettings = DBusDict(
-        DBusSignature('s'),
-        DBusSignature('v'),
-        {
-          DBusString('method'): DBusVariant(DBusString('manual')),
-          DBusString('addresses'): DBusVariant(
-            DBusArray(
-              DBusSignature('(...)'), // Will use AddressData instead
-              [],
-            ),
-          ),
-        },
-      );
+      final full = await _getFullSettings(connPath.value);
+      if (full == null) return false;
 
-      // Use Update2 if available, otherwise Update
-      final conn = _obj(connPath.value);
-      // ignore: unused_local_variable
-      final settings = _buildStaticIPSettings(ip, prefix, gateway, dns);
-      await conn.callMethod(_nmSettingsConnIface, 'Update', [settings]);
+      final prefix = _subnetToPrefix(subnet);
+      final addrEntry = DBusDict(DBusSignature('s'), DBusSignature('v'), {
+        DBusString('address'): DBusString(ip),
+        DBusString('prefix'): DBusUint32(prefix),
+      });
+      final dnsServers = <DBusValue>[
+        if (dns1.isNotEmpty) DBusUint32(_ipToInt(dns1)),
+        if (dns2.isNotEmpty) DBusUint32(_ipToInt(dns2)),
+      ];
+
+      final ipv4 = full['ipv4'] ?? {};
+      ipv4['method'] = DBusString('manual');
+      ipv4['address-data'] = DBusArray(DBusSignature('a{sv}'), [addrEntry]);
+      ipv4['gateway'] = DBusString(gateway);
+      if (dnsServers.isNotEmpty) {
+        ipv4['dns'] = DBusArray(DBusSignature('u'), dnsServers);
+        ipv4['ignore-auto-dns'] = DBusBoolean(true);
+      }
+      full['ipv4'] = ipv4;
+
+      await _obj(connPath.value).callMethod(
+        _nmSettingsConnIface, 'Update', [_buildSettingsDict(full)],
+      );
       return true;
     } catch (e) {
       debugPrint('[NM] setStaticIP error: $e');
@@ -688,11 +761,20 @@ class NetworkManagerService {
     try {
       final connPath = await _findSavedConnectionForSsid(ssid);
       if (connPath == null) return false;
-      final conn = _obj(connPath.value);
-      await conn.callMethod(
-        _nmSettingsConnIface,
-        'Update',
-        [_buildDhcpSettings()],
+
+      final full = await _getFullSettings(connPath.value);
+      if (full == null) return false;
+
+      final ipv4 = full['ipv4'] ?? {};
+      ipv4['method'] = DBusString('auto');
+      // Remove static-IP fields if present
+      ipv4.remove('address-data');
+      ipv4.remove('addresses');
+      ipv4.remove('gateway');
+      full['ipv4'] = ipv4;
+
+      await _obj(connPath.value).callMethod(
+        _nmSettingsConnIface, 'Update', [_buildSettingsDict(full)],
       );
       return true;
     } catch (e) {
@@ -704,10 +786,35 @@ class NetworkManagerService {
   Future<bool> setDNS(String ssid, String dns1, String dns2) async {
     try {
       final connPath = await _findSavedConnectionForSsid(ssid);
-      if (connPath == null) return false;
-      // DNS update requires full settings update; simplified here
+      if (connPath == null) {
+        debugPrint('[NM] setDNS: no saved connection for $ssid');
+        return false;
+      }
+
+      final full = await _getFullSettings(connPath.value);
+      if (full == null) return false;
+
+      final dnsServers = <DBusValue>[];
+      if (dns1.isNotEmpty) dnsServers.add(DBusUint32(_ipToInt(dns1)));
+      if (dns2.isNotEmpty) dnsServers.add(DBusUint32(_ipToInt(dns2)));
+
+      final ipv4 = full['ipv4'] ?? {};
+      if (dnsServers.isNotEmpty) {
+        ipv4['dns'] = DBusArray(DBusSignature('u'), dnsServers);
+        ipv4['ignore-auto-dns'] = DBusBoolean(true);
+      } else {
+        ipv4.remove('dns');
+        ipv4['ignore-auto-dns'] = DBusBoolean(false);
+      }
+      full['ipv4'] = ipv4;
+
+      await _obj(connPath.value).callMethod(
+        _nmSettingsConnIface, 'Update', [_buildSettingsDict(full)],
+      );
+      debugPrint('[NM] setDNS ok: dns1=$dns1 dns2=$dns2');
       return true;
     } catch (e) {
+      debugPrint('[NM] setDNS error: $e');
       return false;
     }
   }
@@ -716,23 +823,119 @@ class NetworkManagerService {
     try {
       final connPath = await _findSavedConnectionForSsid(ssid);
       if (connPath == null) return false;
-      // Patch connection settings
+
+      final full = await _getFullSettings(connPath.value);
+      if (full == null) return false;
+
+      final conn = full['connection'] ?? {};
+      conn['autoconnect'] = DBusBoolean(autoConnect);
+      full['connection'] = conn;
+
+      await _obj(connPath.value).callMethod(
+        _nmSettingsConnIface, 'Update', [_buildSettingsDict(full)],
+      );
       return true;
     } catch (e) {
+      debugPrint('[NM] setAutoConnect error: $e');
       return false;
     }
   }
 
   Future<ConnectionDetails> getConnectionDetails(String ssid) async {
-    return ConnectionDetails(
-      ssid: ssid,
-      ipAddress: '',
-      gateway: '',
-      subnet: '',
-      dns: '',
-      autoConnect: true,
-      isDhcp: true,
-    );
+    try {
+      final connPath = await _findSavedConnectionForSsid(ssid);
+      if (connPath == null) {
+        return ConnectionDetails(
+          ssid: ssid,
+          ipAddress: '',
+          gateway: '',
+          subnet: '',
+          dns: '',
+          autoConnect: true,
+          isDhcp: true,
+        );
+      }
+
+      final connObj = _obj(connPath.value);
+      final result = await connObj.callMethod(
+        _nmSettingsConnIface,
+        'GetSettings',
+        [],
+        replySignature: DBusSignature('a{sa{sv}}'),
+      );
+
+      final topDict = result.values.first as DBusDict;
+
+      // ── Helper: extract inner a{sv} map ──────────────────────────────────
+      Map<String, DBusValue> section(String key) {
+        final raw = topDict.children[DBusString(key)];
+        if (raw == null) return {};
+        final inner = raw as DBusDict;
+        return {
+          for (final e in inner.children.entries)
+            (e.key as DBusString).value: (e.value as DBusVariant).value,
+        };
+      }
+
+      // ── connection section ───────────────────────────────────────────────
+      final connSection = section('connection');
+      final autoConnect =
+          (connSection['autoconnect'] as DBusBoolean?)?.value ?? true;
+
+      // ── ipv4 section ─────────────────────────────────────────────────────
+      final ipv4 = section('ipv4');
+      final method = (ipv4['method'] as DBusString?)?.value ?? 'auto';
+      final isDhcp = method == 'auto';
+
+      // Address data: array of a{sv}
+      String ipAddress = '';
+      String subnet = '';
+      final addrData = ipv4['address-data'] as DBusArray?;
+      if (addrData != null && addrData.children.isNotEmpty) {
+        final first = addrData.children.first as DBusDict;
+        final addrMap = {
+          for (final e in first.children.entries)
+            (e.key as DBusString).value: (e.value as DBusVariant).value,
+        };
+        ipAddress = (addrMap['address'] as DBusString?)?.value ?? '';
+        final prefix = (addrMap['prefix'] as DBusUint32?)?.value ?? 24;
+        subnet = prefix.toString();
+      }
+
+      final gateway = (ipv4['gateway'] as DBusString?)?.value ?? '';
+
+      // DNS: array of uint32 big-endian packed IPv4
+      String dns = '';
+      final dnsArr = ipv4['dns'] as DBusArray?;
+      if (dnsArr != null && dnsArr.children.isNotEmpty) {
+        final dnsIps = dnsArr.children
+            .map((v) => _intToIp((v as DBusUint32).value.toInt()))
+            .where((s) => s.isNotEmpty)
+            .toList();
+        dns = dnsIps.join(', ');
+      }
+
+      return ConnectionDetails(
+        ssid: ssid,
+        ipAddress: ipAddress,
+        gateway: gateway,
+        subnet: subnet,
+        dns: dns,
+        autoConnect: autoConnect,
+        isDhcp: isDhcp,
+      );
+    } catch (e) {
+      debugPrint('[NM] getConnectionDetails error: $e');
+      return ConnectionDetails(
+        ssid: ssid,
+        ipAddress: '',
+        gateway: '',
+        subnet: '',
+        dns: '',
+        autoConnect: true,
+        isDhcp: true,
+      );
+    }
   }
 
   // ────────────────────────────────────────────────────────────────────────
@@ -884,8 +1087,26 @@ class NetworkManagerService {
               .toList();
 
       for (final cp in connPaths) {
-        final s = await _getSsidFromConnection(cp.value);
-        if (s == ssid) return cp;
+        // Use _getFullSettings which correctly unwraps DBusVariant values
+        final full = await _getFullSettings(cp.value);
+        if (full == null) continue;
+
+        final wireless = full['802-11-wireless'];
+        if (wireless == null) continue;
+
+        final ssidVal = wireless['ssid'];
+        if (ssidVal == null) continue;
+
+        // ssid is stored as array of bytes
+        String connSsid = '';
+        if (ssidVal is DBusArray) {
+          connSsid = String.fromCharCodes(
+            ssidVal.children.map((b) => (b as DBusByte).value),
+          ).trim();
+        }
+
+        debugPrint('[NM] checking saved conn: "$connSsid" vs "$ssid"');
+        if (connSsid == ssid) return cp;
       }
     } catch (e) {
       debugPrint('[NM] findSavedConnection error: $e');
@@ -893,32 +1114,26 @@ class NetworkManagerService {
     return null;
   }
 
+  /// Used by getSavedNetworks — reads SSID from a connection path
   Future<String?> _getSsidFromConnection(String connPath) async {
     try {
-      final connObj = _obj(connPath);
-      final result = await connObj.callMethod(
-        _nmSettingsConnIface,
-        'GetSettings',
-        [],
-        replySignature: DBusSignature('a{sa{sv}}'),
-      );
-      final topDict = result.values.first as DBusDict;
-      for (final topEntry in topDict.children.entries) {
-        if ((topEntry.key as DBusString).value == 'wifi' ||
-            (topEntry.key as DBusString).value == '802-11-wireless') {
-          final innerDict = (topEntry.value as DBusDict);
-          for (final entry in innerDict.children.entries) {
-            if ((entry.key as DBusString).value == 'ssid') {
-              final ssidBytes =
-                  ((entry.value as DBusArray).children);
-              return String.fromCharCodes(
-                ssidBytes.map((b) => (b as DBusByte).value),
-              ).trim();
-            }
-          }
-        }
+      final full = await _getFullSettings(connPath);
+      if (full == null) return null;
+
+      final wireless = full['802-11-wireless'];
+      if (wireless == null) return null;
+
+      final ssidVal = wireless['ssid'];
+      if (ssidVal == null) return null;
+
+      if (ssidVal is DBusArray) {
+        return String.fromCharCodes(
+          ssidVal.children.map((b) => (b as DBusByte).value),
+        ).trim();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[NM] _getSsidFromConnection error: $e');
+    }
     return null;
   }
 
@@ -975,46 +1190,6 @@ class NetworkManagerService {
     return DBusDict(DBusSignature('s'), DBusSignature('a{sv}'), profile);
   }
 
-  DBusDict _buildStaticIPSettings(
-    String ip,
-    int prefix,
-    String gateway,
-    String dns,
-  ) {
-    final addressEntry = DBusDict(DBusSignature('s'), DBusSignature('v'), {
-      DBusString('address'): DBusVariant(DBusString(ip)),
-      DBusString('prefix'): DBusVariant(DBusUint32(prefix)),
-    });
-
-    final ipv4 = <DBusValue, DBusValue>{
-      DBusString('method'): DBusVariant(DBusString('manual')),
-      DBusString('address-data'): DBusVariant(
-        DBusArray(DBusSignature('a{sv}'), [addressEntry]),
-      ),
-      DBusString('gateway'): DBusVariant(DBusString(gateway)),
-      if (dns.isNotEmpty)
-        DBusString('dns'): DBusVariant(
-          DBusArray(
-            DBusSignature('u'),
-            [DBusUint32(_ipToInt(dns))],
-          ),
-        ),
-    };
-
-    return DBusDict(DBusSignature('s'), DBusSignature('a{sv}'), {
-      DBusString('ipv4'): DBusDict(DBusSignature('s'), DBusSignature('v'), ipv4),
-    });
-  }
-
-  DBusDict _buildDhcpSettings() {
-    return DBusDict(DBusSignature('s'), DBusSignature('a{sv}'), {
-      DBusString('ipv4'): DBusDict(
-        DBusSignature('s'),
-        DBusSignature('v'),
-        {DBusString('method'): DBusVariant(DBusString('auto'))},
-      ),
-    });
-  }
 
   static String _prefixToSubnet(int prefix) {
     if (prefix <= 0 || prefix > 32) return '255.255.255.0';
@@ -1056,6 +1231,20 @@ class NetworkManagerService {
       return (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3];
     } catch (_) {
       return 0;
+    }
+  }
+
+  /// Convert packed uint32 (big-endian) back to dotted-decimal IPv4
+  static String _intToIp(int value) {
+    try {
+      return [
+        (value >> 24) & 0xFF,
+        (value >> 16) & 0xFF,
+        (value >> 8) & 0xFF,
+        value & 0xFF,
+      ].join('.');
+    } catch (_) {
+      return '';
     }
   }
 }

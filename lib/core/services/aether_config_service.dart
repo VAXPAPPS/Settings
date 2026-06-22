@@ -59,6 +59,16 @@ class AetherConfigService implements CompositorConfigService {
     }
 
     await _writeLines(_keybindingsPath, newLines);
+
+    // Add a space to config.conf to trigger compositor reload
+    try {
+      final configFile = File(_configPath);
+      if (await configFile.exists()) {
+        await configFile.writeAsString(' ', mode: FileMode.append, flush: true);
+      }
+    } catch (e) {
+      // Ignore if failed
+    }
   }
 
   @override

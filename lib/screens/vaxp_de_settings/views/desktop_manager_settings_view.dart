@@ -604,7 +604,10 @@ class _SystemWallpapersCardState extends State<_SystemWallpapersCard> {
                                         width: 2,
                                       ),
                                       image: isVideo ? null : DecorationImage(
-                                        image: FileImage(File(path)),
+                                        image: ResizeImage(
+                                          FileImage(File(path)),
+                                          width: 300, // Resize to act as a thumbnail
+                                        ),
                                         fit: BoxFit.cover,
                                       ),
                                     ),

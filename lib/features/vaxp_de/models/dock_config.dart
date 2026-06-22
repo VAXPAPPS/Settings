@@ -65,9 +65,9 @@ class DockConfig {
   // Format color to string based on isRgba preference
   static String formatColor(Color color, {bool isRgba = false}) {
     if (isRgba) {
-      return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${(color.alpha / 255).toStringAsFixed(3)})';
+      return 'rgba(${(color.r * 255).round()}, ${(color.g * 255).round()}, ${(color.b * 255).round()}, ${color.a.toStringAsFixed(3)})';
     } else {
-      return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}'; // Exclude alpha for hex to match `#00fcd2` format
+      return '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}'; // Exclude alpha for hex to match `#00fcd2` format
     }
   }
 }

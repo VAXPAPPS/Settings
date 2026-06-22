@@ -133,7 +133,7 @@ class DockSettingsView extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color.fromARGB(154, 0, 0, 0),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -268,7 +268,7 @@ class DockSettingsView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
                 boxShadow: [
                   BoxShadow(
                     color: const Color.fromARGB(102, 0, 0, 0),
@@ -332,9 +332,9 @@ class DockSettingsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: child,
     );

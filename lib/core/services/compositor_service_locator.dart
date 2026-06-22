@@ -3,6 +3,7 @@ import 'compositor_env.dart';
 import 'wayfire_config_service.dart';
 import 'hyprland_config_service.dart';
 import 'sway_config_service.dart';
+import 'aether_config_service.dart';
 
 class CompositorServiceLocator {
   static CompositorConfigService? _instance;
@@ -15,6 +16,9 @@ class CompositorServiceLocator {
     final type = CompositorEnv.detectCompositor();
     
     switch (type) {
+      case CompositorType.aether:
+        _instance = AetherConfigService();
+        break;
       case CompositorType.hyprland:
         _instance = HyprlandConfigService();
         break;

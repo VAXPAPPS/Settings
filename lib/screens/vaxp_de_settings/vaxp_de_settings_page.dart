@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settings/features/vaxp_de/vaxp_de.dart';
 import 'package:settings/screens/vaxp_de_settings/views/dock_settings_view.dart';
+import 'package:settings/screens/vaxp_de_settings/views/desktop_manager_settings_view.dart';
 
 class VaxpDeSettingsPage extends StatelessWidget {
   const VaxpDeSettingsPage({super.key});
@@ -83,7 +84,15 @@ class VaxpDeSettingsView extends StatelessWidget {
                     description: 'Wallpapers and icons behavior',
                     icon: Icons.wallpaper_rounded,
                     onTap: () {
-                      // Coming soon
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                            create: (context) => DesktopManagerBloc()..add(LoadDesktopManagerConfig()),
+                            child: const _DesktopManagerSettingsScaffold(),
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -189,6 +198,46 @@ class _DockSettingsScaffold extends StatelessWidget {
       body: const Padding(
         padding: EdgeInsets.symmetric(horizontal: 32.0),
         child: DockSettingsView(),
+      ),
+    );
+  }
+}
+
+class _DesktopManagerSettingsScaffold extends StatelessWidget {
+  const _DesktopManagerSettingsScaffold();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(100, 0, 0, 0),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Desktop Manager Settings',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              context.read<DesktopManagerBloc>().add(RestoreDefaultDesktopManagerConfig());
+            },
+            icon: const Icon(Icons.restore_rounded, color: Colors.white70),
+            label: const Text(
+              'Restore Settings',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
+      body: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32.0),
+        child: DesktopManagerSettingsView(),
       ),
     );
   }

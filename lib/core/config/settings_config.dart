@@ -9,6 +9,7 @@ import 'package:settings/screens/mouse_settings/mouse_settings_page.dart';
 import 'package:settings/screens/keyboard_settings/keyboard_settings_page.dart';
 import 'package:settings/screens/system_settings/system_settings_page.dart';
 import 'package:settings/screens/power_settings/power_settings_page.dart';
+import 'package:settings/screens/vaxp_de_settings/vaxp_de_settings_page.dart';
 
 class SettingsPageItem {
   final String label;
@@ -40,9 +41,14 @@ const List<SettingsPageItem> settingsPages = [
   ),
 
   SettingsPageItem(
-    label: 'Venom Theme',
+    label: 'VAXP Theme',
     icon: Icons.apps_rounded,
     page: AppsSettingsPage(),
+  ),
+  SettingsPageItem(
+    label: 'VAXP DE',
+    icon: Icons.desktop_windows_rounded,
+    page: VaxpDeSettingsPage(),
   ),
   SettingsPageItem(
     label: 'Display',

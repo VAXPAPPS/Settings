@@ -95,6 +95,33 @@ class VaxpDeSettingsView extends StatelessWidget {
                       );
                     },
                   ),
+                  _buildSectionCard(
+                    context: context,
+                    title: 'osd-notify',
+                    description: 'Notifications and OSD settings',
+                    icon: Icons.notifications_active_rounded,
+                    onTap: () {
+                      // Coming soon
+                    },
+                  ),
+                  _buildSectionCard(
+                    context: context,
+                    title: 'vaxplock',
+                    description: 'Lock screen customization',
+                    icon: Icons.lock_rounded,
+                    onTap: () {
+                      // Coming soon
+                    },
+                  ),
+                  _buildSectionCard(
+                    context: context,
+                    title: 'vaxpother',
+                    description: 'Additional configurations',
+                    icon: Icons.extension_rounded,
+                    onTap: () {
+                      // Coming soon
+                    },
+                  ),
                 ],
               ),
             ),

@@ -48,7 +48,6 @@ class DesktopManagerConfig {
   }
 
   static const List<String> animationNames = [
-    'None',
     'Sliding Doors',
     'Circle Reveal',
     'Smooth Crossfade',

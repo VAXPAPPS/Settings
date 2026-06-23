@@ -214,7 +214,15 @@ class DesktopManagerSettingsView extends StatelessWidget {
                 result = resultObj?.files.single.path;
               }
               if (result != null) {
-                onChanged(result);
+                if (isDir) {
+                  final currentDirs = currentPath.split(';').where((e) => e.trim().isNotEmpty).toList();
+                  if (!currentDirs.contains(result)) {
+                    currentDirs.add(result);
+                  }
+                  onChanged('${currentDirs.join(';')};');
+                } else {
+                  onChanged(result);
+                }
               }
             },
             icon: Icon(isDir ? Icons.folder_rounded : Icons.image_rounded, size: 18),
@@ -257,7 +265,7 @@ class DesktopManagerSettingsView extends StatelessWidget {
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
-                value: config.wallpaperAnim >= 0 && config.wallpaperAnim <= 10 ? config.wallpaperAnim : 0,
+                value: config.wallpaperAnim >= 0 && config.wallpaperAnim <= 9 ? config.wallpaperAnim : 0,
                 dropdownColor: const Color.fromARGB(91, 0, 0, 0),
                 style: const TextStyle(color: Colors.white),
                 icon: const Icon(Icons.arrow_drop_down, color: Colors.white70),
@@ -271,7 +279,7 @@ class DesktopManagerSettingsView extends StatelessWidget {
                 items: DesktopManagerConfig.animationNames.asMap().entries.map((entry) {
                   return DropdownMenuItem(
                     value: entry.key,
-                    child: Text('${entry.key == 0 ? "" : "${entry.key}. "}${entry.value}'),
+                    child: Text('${entry.key}. ${entry.value}'),
                   );
                 }).toList(),
               ),
@@ -473,7 +481,7 @@ class _SystemWallpapersCardState extends State<_SystemWallpapersCard> {
     final List<String> paths = [];
     final dirsToSearch = ['/usr/share/backgrounds'];
     if (userDir.isNotEmpty) {
-      dirsToSearch.add(userDir);
+      dirsToSearch.addAll(userDir.split(';').where((e) => e.trim().isNotEmpty));
     }
 
     for (final dirPath in dirsToSearch) {

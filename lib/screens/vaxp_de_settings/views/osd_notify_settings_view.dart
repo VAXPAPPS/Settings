@@ -25,9 +25,9 @@ class OsdNotifySettingsView extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.red.withOpacity(0.3)),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
               child: Text(
                 'Error loading settings:\n${state.message}',
@@ -45,9 +45,9 @@ class OsdNotifySettingsView extends StatelessWidget {
             data: ThemeData.dark().copyWith(
               sliderTheme: SliderThemeData(
                 activeTrackColor: const Color(0xFF00FFFF),
-                inactiveTrackColor: Colors.white.withOpacity(0.1),
+                inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
                 thumbColor: const Color(0xFF00FFFF),
-                overlayColor: const Color(0xFF00FFFF).withOpacity(0.2),
+                overlayColor: const Color(0xFF00FFFF).withValues(alpha: 0.2),
                 valueIndicatorColor: const Color(0xFF222222),
               ),
             ),
@@ -140,7 +140,7 @@ class OsdNotifySettingsView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF00FFFF).withOpacity(0.15),
+              color: const Color(0xFF00FFFF).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: const Color(0xFF00FFFF), size: 24),
@@ -162,7 +162,7 @@ class OsdNotifySettingsView extends StatelessWidget {
               Text(
                 subtitle,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 13,
                 ),
               ),
@@ -180,9 +180,9 @@ class OsdNotifySettingsView extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.03),
+            color: Colors.white.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
           ),
           child: Column(
             children: children,
@@ -196,7 +196,7 @@ class OsdNotifySettingsView extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 1,
-      color: Colors.white.withOpacity(0.05),
+      color: Colors.white.withValues(alpha: 0.05),
       indent: 16,
       endIndent: 16,
     );
@@ -218,16 +218,16 @@ class OsdNotifySettingsView extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 'Notification popup screen location',
-                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
               ),
             ],
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -273,7 +273,7 @@ class OsdNotifySettingsView extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
                 ),
               ],
             ),
@@ -340,7 +340,7 @@ class OsdNotifySettingsView extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
                 ),
               ],
             ),
@@ -350,10 +350,10 @@ class OsdNotifySettingsView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 2),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -377,76 +377,62 @@ class OsdNotifySettingsView extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) {
-        return Dialog(
+      builder: (BuildContext context) {
+        return AlertDialog(
           backgroundColor: Colors.transparent,
-          child: Container(
-            width: 400,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E1E),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+          surfaceTintColor: Colors.transparent,
+          contentPadding: EdgeInsets.zero,
+          content: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(150, 10, 10, 15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    width: 1,
                   ),
                 ),
-                const SizedBox(height: 24),
-                ColorPicker(
-                  pickerColor: initialColor,
-                  onColorChanged: (c) => currentColor = c,
-                  enableAlpha: enableAlpha,
-                  displayThumbColor: true,
-                  portraitOnly: true,
-                  pickerAreaBorderRadius: BorderRadius.circular(12),
-                  pickerAreaHeightPercent: 0.7,
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white54,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      ),
-                      child: const Text('Cancel'),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        onColorChanged(currentColor);
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00FFFF),
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: initialColor,
+                          onColorChanged: (c) => currentColor = c,
+                          enableAlpha: enableAlpha,
+                          displayThumbColor: true,
+                          paletteType: PaletteType.hsvWithHue,
                         ),
                       ),
-                      child: const Text('Save Color', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                        ),
+                        TextButton(
+                          child: const Text('Got it', style: TextStyle(color: Colors.blueAccent)),
+                          onPressed: () {
+                            onColorChanged(currentColor);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         );
@@ -479,7 +465,7 @@ class OsdNotifySettingsView extends StatelessWidget {
                 Text(
                   hasPath ? currentPath : subtitle,
                   style: TextStyle(
-                    color: hasPath ? const Color(0xFF00FFFF) : Colors.white.withOpacity(0.5), 
+                    color: hasPath ? const Color(0xFF00FFFF) : Colors.white.withValues(alpha: 0.5), 
                     fontSize: 13,
                   ),
                   maxLines: 1,
@@ -514,7 +500,7 @@ class OsdNotifySettingsView extends StatelessWidget {
                 icon: const Icon(Icons.folder_open_rounded, size: 18),
                 label: const Text('Browse'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.1),
+                  backgroundColor: Colors.white.withValues(alpha: 0.1),
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(

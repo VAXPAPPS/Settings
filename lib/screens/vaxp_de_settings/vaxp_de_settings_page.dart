@@ -5,6 +5,7 @@ import 'package:settings/screens/vaxp_de_settings/views/dock_settings_view.dart'
 import 'package:settings/screens/vaxp_de_settings/views/desktop_manager_settings_view.dart';
 import 'package:settings/screens/vaxp_de_settings/views/osd_notify_settings_view.dart';
 import 'package:settings/screens/vaxp_de_settings/views/aetherlock_settings_view.dart';
+import 'package:settings/screens/vaxp_de_settings/views/vaxpother_settings_view.dart';
 class VaxpDeSettingsPage extends StatelessWidget {
   const VaxpDeSettingsPage({super.key});
 
@@ -132,11 +133,22 @@ class VaxpDeSettingsView extends StatelessWidget {
                   ),
                   _buildSectionCard(
                     context: context,
-                    title: 'vaxpother',
-                    description: 'Additional configurations',
+                    title: 'Vaxp Other',
+                    description: 'Auth & Clipboard customizations',
                     icon: Icons.extension_rounded,
                     onTap: () {
-                      // Coming soon
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(create: (context) => AuthBloc()..add(LoadAuthConfig())),
+                              BlocProvider(create: (context) => ClipboardBloc()..add(LoadClipboardConfig())),
+                            ],
+                            child: const _VaxpOtherSettingsScaffold(),
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -362,6 +374,59 @@ class _AetherLockSettingsScaffold extends StatelessWidget {
       body: const Padding(
         padding: EdgeInsets.symmetric(horizontal: 32.0),
         child: AetherLockSettingsView(),
+      ),
+    );
+  }
+}
+
+class _VaxpOtherSettingsScaffold extends StatelessWidget {
+  const _VaxpOtherSettingsScaffold();
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: const Color.fromARGB(100, 0, 0, 0),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: const Text(
+            'Vaxp Other Settings',
+            style: TextStyle(color: Colors.white),
+          ),
+          bottom: const TabBar(
+            indicatorColor: Color(0xFF7EE0C9),
+            labelColor: Color(0xFF7EE0C9),
+            unselectedLabelColor: Colors.white54,
+            tabs: [
+              Tab(icon: Icon(Icons.security_rounded), text: 'Authentication'),
+              Tab(icon: Icon(Icons.content_paste_rounded), text: 'Clipboard'),
+            ],
+          ),
+          actions: [
+            TextButton.icon(
+              onPressed: () {
+                context.read<AuthBloc>().add(RestoreDefaultAuthConfig());
+                context.read<ClipboardBloc>().add(RestoreDefaultClipboardConfig());
+              },
+              icon: const Icon(Icons.restore_rounded, color: Colors.white70),
+              label: const Text(
+                'Restore Both',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+            const SizedBox(width: 16),
+          ],
+        ),
+        body: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 32.0),
+          child: VaxpOtherSettingsView(),
+        ),
       ),
     );
   }

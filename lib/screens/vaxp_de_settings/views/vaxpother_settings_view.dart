@@ -167,7 +167,7 @@ class _ClipboardSettingsTab extends StatelessWidget {
                   const Text('Ghost Mode', style: TextStyle(color: Colors.white, fontSize: 16)),
                   Switch(
                     value: config.ghostMode,
-                    activeColor: const Color(0xFFC084FC),
+                    activeThumbColor: const Color(0xFFC084FC),
                     onChanged: (val) => context.read<ClipboardBloc>().add(UpdateClipboardConfig(config.copyWith(ghostMode: val))),
                   ),
                 ],

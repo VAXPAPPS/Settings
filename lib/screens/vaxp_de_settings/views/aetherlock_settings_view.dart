@@ -184,7 +184,7 @@ class AetherLockSettingsView extends StatelessWidget {
                           ),
                           Switch(
                             value: config.hideContent,
-                            activeColor: config.accent,
+                            activeThumbColor: config.accent,
                             onChanged: (val) => context.read<AetherLockBloc>().add(
                               UpdateAetherLockConfig(config.copyWith(hideContent: val)),
                             ),
